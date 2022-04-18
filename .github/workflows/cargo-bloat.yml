@@ -1,0 +1,38 @@
+name: Rust (cargo bloat)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        cargo-bloat-version:
+          - '0.11.0'
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: cargo version
+      run: cargo --version
+    - name: install cargo-bloat (v${{ matrix.cargo-bloat-version }})
+      run: cargo install cargo-bloat --version ${{ matrix.cargo-bloat-version }}
+    - name: cargo bloat --time (release)
+      run: cargo bloat --profile=release-cargo-bloat --time --jobs 1
+    - name: cargo bloat (display, release)
+      run: cargo bloat --profile=release-cargo-bloat
+    - name: cargo bloat (display, per-crate, release)
+      run: cargo bloat --profile=release-cargo-bloat --crates
+    - name: cargo bloat (testing, release)
+      # Size <= 512KiB?
+      run: cargo bloat --profile=release-cargo-bloat --message-format json | jq --exit-status '."file-size" <= 524288'

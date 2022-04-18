@@ -1,0 +1,28 @@
+[package]
+name = "shogi_official_kifu"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["std"]
+std = []
+
+[lib]
+crate-type = [
+    "rlib",
+    "cdylib",
+]
+
+[dependencies]
+csa = "1"
+
+[profile.dev]
+debug = false
+
+[profile.release]
+opt-level = "z"
+strip = "symbols"
+
+[profile.release-cargo-bloat]
+inherits = "release"
+strip = "debuginfo" # "symbols" prevents cargo-bloat from displaying crate-wise info.
