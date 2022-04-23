@@ -1,12 +1,14 @@
 [package]
-name = "shogi_official_kifu"
+name = "shogi_core"
 version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["kansuji", "std"]
-kansuji = []
-std = []
+default = ["std"]
+alloc = []
+hash = []
+ord = []
+std = ["alloc"]
 
 [lib]
 crate-type = [
@@ -14,13 +16,15 @@ crate-type = [
     "cdylib",
 ]
 
-[dependencies]
-shogi = "0.12"
-shogi_core = { path = "./shogi_core" }
-
 [profile.dev]
+panic = "abort"
 debug = false
 
 [profile.release]
 opt-level = "z"
+panic = "abort"
 strip = "debuginfo" # "symbol" removes exported symbols, which renders the generated cdylib useless.
+
+[profile.release-speed]
+inherits = "release"
+opt-level = 3

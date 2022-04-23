@@ -28,11 +28,11 @@ jobs:
     - name: install cargo-bloat (v${{ matrix.cargo-bloat-version }})
       run: cargo install cargo-bloat --version ${{ matrix.cargo-bloat-version }}
     - name: cargo bloat --time (release)
-      run: cargo bloat --profile=release-cargo-bloat --time --jobs 1
+      run: cargo bloat --release --time --jobs 1
     - name: cargo bloat (display, release)
-      run: cargo bloat --profile=release-cargo-bloat
+      run: cargo bloat --release
     - name: cargo bloat (display, per-crate, release)
-      run: cargo bloat --profile=release-cargo-bloat --crates
+      run: cargo bloat --release --crates
     - name: cargo bloat (testing, release)
       # Size <= 512KiB?
-      run: cargo bloat --profile=release-cargo-bloat --message-format json | jq --exit-status '."file-size" <= 524288'
+      run: cargo bloat --release --message-format json | jq --exit-status '."file-size" <= 524288'
