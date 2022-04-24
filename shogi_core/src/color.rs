@@ -1,3 +1,5 @@
+use crate::ToUsi;
+
 /// A player.
 ///
 /// `Color` and `Option<Color>` are both 1-byte data types.
@@ -25,11 +27,23 @@ impl Color {
     /// ```
     #[export_name = "Color_flip"]
     pub extern "C" fn flip(self) -> Self {
+        // The shortest possible machine code for this function in x86_64 (System V AMD64 ABI) is:
+        // 89 f8  movl %edi, %eax
+        // 34 03  xorb $3, %al
         unsafe { core::mem::transmute(self as u8 ^ 3) }
     }
     #[cfg(test)]
     pub(crate) fn all() -> [Self; 2] {
         [Color::Black, Color::White]
+    }
+}
+
+impl ToUsi for Color {
+    fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
+        sink.write_char(match *self {
+            Color::Black => 'B',
+            Color::White => 'W',
+        })
     }
 }
 

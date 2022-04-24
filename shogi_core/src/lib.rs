@@ -1,9 +1,26 @@
+#![cfg_attr(
+    all(feature = "alloc", not(feature = "std")),
+    feature(alloc_error_handler)
+)]
 #![cfg_attr(not(feature = "std"), no_std)] // Forbids using std::*.
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
+mod bitboard;
 mod color;
+mod hand;
+mod mv;
+#[cfg(not(feature = "std"))]
+mod no_std;
 mod piece;
 mod piece_kind;
+mod position;
 mod square;
+mod to_usi;
+
+#[doc(inline)]
+pub use crate::to_usi::ToUsi;
 
 #[doc(inline)]
 pub use crate::color::Color;
@@ -17,11 +34,24 @@ pub use crate::piece_kind::PieceKind;
 #[doc(inline)]
 pub use crate::piece::Piece;
 
-#[cfg(not(feature = "std"))]
-#[panic_handler]
-fn panic(_panic: &core::panic::PanicInfo<'_>) -> ! {
-    loop {}
-}
+#[doc(inline)]
+pub use crate::mv::Move;
+
+#[doc(inline)]
+pub use crate::mv::CompactMove;
+
+#[doc(inline)]
+pub use crate::hand::Hand;
+
+#[doc(inline)]
+pub use crate::bitboard::Bitboard;
+
+#[doc(inline)]
+pub use crate::position::PartialPosition;
+
+#[cfg(feature = "alloc")]
+#[doc(inline)]
+pub use crate::position::Position;
 
 #[cfg(test)]
 mod tests {
