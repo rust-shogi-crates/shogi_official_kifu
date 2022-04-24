@@ -2,6 +2,7 @@
 name = "shogi_core"
 version = "0.1.0"
 edition = "2021"
+categories = ["no-std"]
 
 [features]
 default = ["std"]
@@ -13,7 +14,7 @@ std = ["alloc"]
 [lib]
 crate-type = [
     "rlib",
-    "cdylib",
+    "cdylib", # in debug + no-std setting it doesn't work. _memset is undefined
 ]
 
 [profile.dev]

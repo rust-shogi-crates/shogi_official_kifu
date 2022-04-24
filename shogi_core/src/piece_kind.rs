@@ -111,6 +111,8 @@ impl PieceKind {
     /// Returns the promoted version of `self`.
     ///
     /// If `self` cannot promote, this function returns `None`.
+    #[must_use]
+    #[inline]
     pub fn promote(self) -> Option<Self> {
         match self {
             PieceKind::Pawn => Some(PieceKind::ProPawn),
@@ -132,6 +134,8 @@ impl PieceKind {
     /// Returns the un-promoted version of `self`. This function can also be used to check if a piece is promoted.
     ///
     /// If `self` is not a promoted piece, this function returns `None`.
+    #[must_use]
+    #[inline]
     pub fn unpromote(self) -> Option<Self> {
         match self {
             PieceKind::Pawn => None,
@@ -157,6 +161,18 @@ impl PieceKind {
         core::mem::transmute(repr)
     }
 
+    #[allow(non_snake_case)]
+    #[no_mangle]
+    extern "C" fn PieceKind_promote(self) -> OptionPieceKind {
+        self.promote().into()
+    }
+
+    #[allow(non_snake_case)]
+    #[no_mangle]
+    extern "C" fn PieceKind_unpromote(self) -> OptionPieceKind {
+        self.unpromote().into()
+    }
+
     #[cfg(test)]
     pub(crate) fn all() -> [Self; 14] {
         [
@@ -175,5 +191,23 @@ impl PieceKind {
             PieceKind::ProBishop,
             PieceKind::ProRook,
         ]
+    }
+}
+
+/// Option<PieceKind> with defined representation.
+/// None => 0, Some(x) => x.
+///
+/// This type is provided only for C interoperability.
+/// Users of this type should convert to/from Option<PieceKind>.
+#[repr(transparent)]
+pub struct OptionPieceKind(u8);
+
+impl From<Option<PieceKind>> for OptionPieceKind {
+    #[inline(always)]
+    fn from(arg: Option<PieceKind>) -> Self {
+        Self(match arg {
+            Some(result) => result as u8,
+            None => 0,
+        })
     }
 }
