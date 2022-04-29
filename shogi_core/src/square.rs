@@ -67,7 +67,7 @@ impl Square {
         self.0.get()
     }
 
-    /// TODO
+    /// Finds the rank from the perspective of `color`.
     #[export_name = "Square_relative_rank"]
     pub extern "C" fn relative_rank(self, color: Color) -> u8 {
         let rank = self.rank();
@@ -77,7 +77,7 @@ impl Square {
         }
     }
 
-    /// TODO
+    /// Finds the file from the perspective of `color`.
     #[export_name = "Square_relative_file"]
     pub extern "C" fn relative_file(self, color: Color) -> u8 {
         let file = self.file();

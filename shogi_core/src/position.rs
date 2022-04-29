@@ -106,6 +106,13 @@ impl Position {
         Some(())
     }
 
+    /// Makes a move. This function is a C-compatible counterpart of `make_move`.
+    /// Note that this function will never check legality.
+    ///
+    /// Returns true if the given move makes sense, i.e.,
+    /// moves a piece to another square or drops a piece on a vacant square.
+    ///
+    /// If it returns false, it is guaranteed that self is not modified.
     #[export_name = "Position_make_compact_move"]
     pub extern "C" fn make_compact_move(&mut self, mv: CompactMove) -> bool {
         let mv = mv.into();
@@ -316,6 +323,13 @@ impl PartialPosition {
         Some(())
     }
 
+    /// Makes a move. This function is a C-compatible counterpart of `make_move`.
+    /// Note that this function will never check legality.
+    ///
+    /// Returns true if the given move makes sense, i.e.,
+    /// moves a piece to another square or drops a piece on a vacant square.
+    ///
+    /// If it returns false, it is guaranteed that self is not modified.
     #[export_name = "PartialPosition_make_compact_move"]
     pub extern "C" fn make_compact_move(&mut self, mv: CompactMove) -> bool {
         let mv = mv.into();
@@ -355,6 +369,7 @@ impl PartialPosition {
         Ok(())
     }
 
+    /// Returns the SFEN representation of the current position.
     #[cfg(feature = "alloc")]
     pub fn to_sfen_owned(&self) -> alloc::string::String {
         let mut s = alloc::string::String::new();
@@ -366,7 +381,7 @@ impl PartialPosition {
     ///
     /// # Safety
     /// This function writes to ptr at most 138 (= 129 + 1 + 1 + 1 + 0 + 1 + 5) bytes.
-    /// Caller should ensure that ptr has enough space for that.
+    /// Caller should ensure that `ptr` has enough space for that.
     #[export_name = "PartialPosition_to_sfen_c"]
     pub unsafe extern "C" fn to_sfen_c(&self, ptr: *mut u8) {
         struct Bridge(*mut u8);

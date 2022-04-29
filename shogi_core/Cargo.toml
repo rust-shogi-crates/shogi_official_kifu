@@ -14,7 +14,7 @@ std = ["alloc"]
 [lib]
 crate-type = [
     "rlib",
-    "cdylib", # in debug + no-std setting it doesn't work. _memset is undefined
+    "cdylib",
 ]
 
 [profile.dev]

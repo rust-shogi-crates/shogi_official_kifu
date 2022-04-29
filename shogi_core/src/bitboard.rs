@@ -126,11 +126,11 @@ macro_rules! define_bit_trait {
         }
 
         #[no_mangle]
-        extern "C" fn $exported_name(a: Bitboard, b: Bitboard) -> Bitboard {
+        pub extern "C" fn $exported_name(a: Bitboard, b: Bitboard) -> Bitboard {
             a $op b
         }
         #[no_mangle]
-        extern "C" fn $assign_exported_name(a: &mut Bitboard, b: Bitboard) {
+        pub extern "C" fn $assign_exported_name(a: &mut Bitboard, b: Bitboard) {
             a.$assign_funname(b);
         }
     };
@@ -172,8 +172,9 @@ impl Not for Bitboard {
     }
 }
 
+/// C interface of `Bitboard::not`.
 #[no_mangle]
-extern "C" fn Bitboard_not(a: Bitboard) -> Bitboard {
+pub extern "C" fn Bitboard_not(a: Bitboard) -> Bitboard {
     !a
 }
 

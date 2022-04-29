@@ -99,6 +99,8 @@ impl Hand {
         }
         None
     }
+
+    /// C interface of `Hand::added`.
     #[no_mangle]
     pub extern "C" fn Hand_add(&mut self, piece_kind: PieceKind) -> bool {
         if let Some(new) = self.added(piece_kind) {
@@ -108,6 +110,8 @@ impl Hand {
             false
         }
     }
+
+    /// C interface of `Hand::removed`.
     #[no_mangle]
     pub extern "C" fn Hand_remove(&mut self, piece_kind: PieceKind) -> bool {
         if let Some(new) = self.removed(piece_kind) {

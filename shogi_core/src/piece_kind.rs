@@ -161,15 +161,17 @@ impl PieceKind {
         core::mem::transmute(repr)
     }
 
+    /// C interface of `PieceKind::promote`.
     #[allow(non_snake_case)]
     #[no_mangle]
-    extern "C" fn PieceKind_promote(self) -> OptionPieceKind {
+    pub extern "C" fn PieceKind_promote(self) -> OptionPieceKind {
         self.promote().into()
     }
 
+    /// C interface of `PieceKind::unpromote`.
     #[allow(non_snake_case)]
     #[no_mangle]
-    extern "C" fn PieceKind_unpromote(self) -> OptionPieceKind {
+    pub extern "C" fn PieceKind_unpromote(self) -> OptionPieceKind {
         self.unpromote().into()
     }
 

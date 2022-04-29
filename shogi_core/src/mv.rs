@@ -30,6 +30,7 @@ pub enum Move {
 }
 
 impl Move {
+    /// Finds the `from` square, if it exists.
     pub fn from(self) -> Option<Square> {
         match self {
             Move::Normal { from, .. } => Some(from),
@@ -37,6 +38,7 @@ impl Move {
         }
     }
 
+    /// Finds the `to` square.
     pub fn to(self) -> Square {
         match self {
             Move::Normal { to, .. } => to,
@@ -44,6 +46,7 @@ impl Move {
         }
     }
 
+    /// Finds whether `self` is a drop move.
     #[inline]
     pub fn is_drop(self) -> bool {
         matches!(self, Move::Drop { .. })
@@ -53,8 +56,8 @@ impl Move {
 /// A move packed in two bytes.
 ///
 /// Representation is as follows:
-/// normal move: promote * 32768 + from * 256 + to
-/// drop move: piece * 256 + 128 + to
+/// - normal move: promote * 32768 + from * 256 + to
+/// - drop move: piece * 256 + 128 + to
 ///
 /// Note that the representation cannot be zero.
 #[repr(transparent)]
@@ -118,11 +121,13 @@ impl CompactMove {
         unsafe { Square::from_u8(to) }
     }
 
+    /// Finds whether `self` promotes a piece.
     #[export_name = "CompactMove_is_promoting"]
     pub extern "C" fn is_promoting(self) -> bool {
         (self.0.get() & 32768) != 0
     }
 
+    /// Finds whether `self` is a drop move.
     #[export_name = "CompactMove_is_drop"]
     #[inline]
     pub extern "C" fn is_drop(self) -> bool {
