@@ -373,14 +373,14 @@ impl PartialPosition {
     #[cfg(feature = "alloc")]
     pub fn to_sfen_owned(&self) -> alloc::string::String {
         let mut s = alloc::string::String::new();
-        self.to_sfen(&mut s).unwrap();
+        let _ = self.to_sfen(&mut s); // Cannot fail
         s
     }
 
     /// C interface of `to_sfen`.
     ///
     /// # Safety
-    /// This function writes to ptr at most 138 (= 129 + 1 + 1 + 1 + 0 + 1 + 5) bytes.
+    /// This function writes to `ptr` at most 139 (= 129 + 1 + 1 + 1 + 0 + 1 + 5 + 1) bytes.
     /// Caller should ensure that `ptr` has enough space for that.
     #[export_name = "PartialPosition_to_sfen_c"]
     pub unsafe extern "C" fn to_sfen_c(&self, ptr: *mut u8) {
@@ -397,7 +397,9 @@ impl PartialPosition {
                 Ok(())
             }
         }
-        let _ = self.to_sfen(&mut Bridge(ptr));
+        let mut sink = Bridge(ptr);
+        let _ = self.to_sfen(&mut sink);
+        let _ = sink.write_char('\0');
     }
 }
 
