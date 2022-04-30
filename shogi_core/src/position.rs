@@ -1,7 +1,10 @@
 use core::fmt::{Result as FmtResult, Write};
 use core::mem::MaybeUninit;
 
-use crate::{Bitboard, Color, CompactMove, Hand, Move, Piece, PieceKind, Square, ToUsi};
+use crate::c_compat::OptionCompactMove;
+use crate::{
+    Bitboard, Color, CompactMove, Hand, Move, OptionPiece, Piece, PieceKind, Square, ToUsi,
+};
 
 /// A position. It provides sufficient data for legality checking.
 #[cfg(feature = "alloc")]
@@ -22,8 +25,17 @@ impl Position {
 
     /// C interface of `startpos`.
     #[no_mangle]
-    pub extern "C" fn Position_startpos(buf: &mut MaybeUninit<Self>) {
-        buf.write(Self::startpos());
+    pub extern "C" fn Position_startpos() -> *mut Self {
+        alloc::boxed::Box::leak(alloc::boxed::Box::new(Self::startpos()))
+    }
+
+    /// Destructs a `Position`.
+    ///
+    /// # Safety
+    /// `ptr` must be the one created by a function in this type.
+    #[no_mangle]
+    pub unsafe extern "C" fn Position_destruct(ptr: *mut Self) {
+        drop(alloc::boxed::Box::from_raw(ptr));
     }
 
     pub fn arbitrary_position(p: PartialPosition) -> Self {
@@ -63,9 +75,13 @@ impl Position {
         self.inner.ply()
     }
 
-    #[export_name = "Position_piece_at"]
-    pub extern "C" fn piece_at(&self, square: Square) -> Option<Piece> {
+    pub fn piece_at(&self, square: Square) -> Option<Piece> {
         self.inner.piece_at(square)
+    }
+
+    #[no_mangle]
+    pub extern "C" fn Position_piece_at(&self, square: Square) -> OptionPiece {
+        self.inner.PartialPosition_piece_at(square)
     }
 
     /// Place a piece on a square.
@@ -102,7 +118,7 @@ impl Position {
     /// assert_eq!(Position::startpos().last_move(), None);
     /// ```
     pub fn last_move(&self) -> Option<Move> {
-        self.inner.last_move
+        self.inner.last_move()
     }
 
     /// Returns the last move, if it exists.
@@ -113,7 +129,12 @@ impl Position {
     /// assert_eq!(Position::startpos().last_compact_move(), None);
     /// ```
     pub fn last_compact_move(&self) -> Option<CompactMove> {
-        self.inner.last_move.map(|mv| mv.into())
+        self.inner.last_compact_move()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn Position_last_compact_move(&self) -> OptionCompactMove {
+        self.inner.PartialPosition_last_compact_move()
     }
 
     /// Makes a move. Note that this function will never check legality.
@@ -140,6 +161,21 @@ impl Position {
         let mv = mv.into();
         self.make_move(mv).is_some()
     }
+
+    /// Returns the SFEN representation of the current position.
+    pub fn to_sfen_owned(&self) -> alloc::string::String {
+        self.inner.to_sfen_owned()
+    }
+
+    /// C interface of `to_sfen`.
+    ///
+    /// # Safety
+    /// This function writes to `ptr` at most 139 (= 129 + 1 + 1 + 1 + 0 + 1 + 5 + 1) bytes.
+    /// Caller should ensure that `ptr` has enough space for that.
+    #[export_name = "Position_to_sfen_c"]
+    pub unsafe extern "C" fn to_sfen_c(&self, ptr: *mut u8) {
+        self.inner.to_sfen_c(ptr)
+    }
 }
 
 /// A position with its move sequence omitted.
@@ -147,31 +183,32 @@ impl Position {
 /// This data is insufficient for complete legality checking (such as repetition checking),
 /// but in most cases it suffices. If you need a complete legality checking, use `Position`.
 #[derive(Eq, PartialEq, Clone, Debug)]
+#[repr(C)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PartialPosition {
     side: Color,
     ply: u16,
     hands: [Hand; 2],
-    board: [Option<Piece>; 81],
-    last_move: Option<Move>,
+    board: [OptionPiece; 81],
+    last_move: OptionCompactMove,
 }
 
 impl PartialPosition {
     /// Returns the starting position of shogi.
     pub fn startpos() -> Self {
         // TODO stop panicking
-        let mut board = [None; 81];
+        let mut board = [None.into(); 81];
         // Pawns
         for i in 0..9 {
-            board[6 + i * 9] = Some(Piece::new(PieceKind::Pawn, Color::Black));
-            board[2 + i * 9] = Some(Piece::new(PieceKind::Pawn, Color::White));
+            board[6 + i * 9] = Some(Piece::new(PieceKind::Pawn, Color::Black)).into();
+            board[2 + i * 9] = Some(Piece::new(PieceKind::Pawn, Color::White)).into();
         }
         // Bishop, Rook
-        board[70] = Some(Piece::new(PieceKind::Bishop, Color::Black));
-        board[10] = Some(Piece::new(PieceKind::Bishop, Color::White));
-        board[16] = Some(Piece::new(PieceKind::Rook, Color::Black));
-        board[64] = Some(Piece::new(PieceKind::Rook, Color::White));
+        board[70] = Some(Piece::new(PieceKind::Bishop, Color::Black)).into();
+        board[10] = Some(Piece::new(PieceKind::Bishop, Color::White)).into();
+        board[16] = Some(Piece::new(PieceKind::Rook, Color::Black)).into();
+        board[64] = Some(Piece::new(PieceKind::Rook, Color::White)).into();
         // Other minor pieces
         let order = [
             PieceKind::Lance,
@@ -185,15 +222,15 @@ impl PartialPosition {
             PieceKind::Lance,
         ];
         for i in 0..9 {
-            board[8 + 9 * i] = Some(Piece::new(order[i], Color::Black));
-            board[9 * i] = Some(Piece::new(order[i], Color::White));
+            board[8 + 9 * i] = Some(Piece::new(order[i], Color::Black)).into();
+            board[9 * i] = Some(Piece::new(order[i], Color::White)).into();
         }
         Self {
             side: Color::Black,
             ply: 1,
             hands: [Default::default(); 2],
             board,
-            last_move: None,
+            last_move: None.into(),
         }
     }
 
@@ -235,8 +272,12 @@ impl PartialPosition {
         self.ply
     }
 
-    #[export_name = "PartialPosition_piece_at"]
-    pub extern "C" fn piece_at(&self, square: Square) -> Option<Piece> {
+    pub fn piece_at(&self, square: Square) -> Option<Piece> {
+        self.PartialPosition_piece_at(square).into()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn PartialPosition_piece_at(&self, square: Square) -> OptionPiece {
         let index = square.index() - 1;
         // Safety: square.index() is in range 1..=81
         *unsafe { self.board.get_unchecked(index as usize) }
@@ -249,7 +290,7 @@ impl PartialPosition {
     pub fn piece_set(&mut self, square: Square, piece: Option<Piece>) {
         let index = square.index() - 1;
         // Safety: square.index() is in range 1..=81
-        *unsafe { self.board.get_unchecked_mut(index as usize) } = piece;
+        *unsafe { self.board.get_unchecked_mut(index as usize) } = piece.into();
     }
 
     /// Finds the subset of squares with no pieces.
@@ -257,7 +298,7 @@ impl PartialPosition {
     pub extern "C" fn vacant_bitboard(&self) -> Bitboard {
         let mut result = Bitboard::empty();
         for i in 0..81 {
-            if self.board[i].is_none() {
+            if Option::<Piece>::from(self.board[i]).is_none() {
                 let square = unsafe { Square::from_u8(i as u8 + 1) };
                 result |= Bitboard::single(square);
             }
@@ -270,7 +311,7 @@ impl PartialPosition {
     pub extern "C" fn player_bitboard(&self, color: Color) -> Bitboard {
         let mut result = Bitboard::empty();
         for i in 0..81 {
-            if let Some(piece) = self.board[i] {
+            if let Some(piece) = Option::<Piece>::from(self.board[i]) {
                 if piece.color() == color {
                     let square = unsafe { Square::from_u8(i as u8 + 1) };
                     result |= Bitboard::single(square);
@@ -285,7 +326,7 @@ impl PartialPosition {
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
         let mut result = Bitboard::empty();
         for i in 0..81 {
-            if self.board[i] == Some(piece) {
+            if self.board[i] == Some(piece).into() {
                 let square = unsafe { Square::from_u8(i as u8 + 1) };
                 result |= Bitboard::single(square);
             }
@@ -301,7 +342,7 @@ impl PartialPosition {
     /// assert_eq!(PartialPosition::startpos().last_move(), None);
     /// ```
     pub fn last_move(&self) -> Option<Move> {
-        self.last_move
+        self.last_compact_move().map(|mv| mv.into())
     }
 
     /// Returns the last move, if it exists.
@@ -312,7 +353,12 @@ impl PartialPosition {
     /// assert_eq!(PartialPosition::startpos().last_compact_move(), None);
     /// ```
     pub fn last_compact_move(&self) -> Option<CompactMove> {
-        self.last_move.map(|mv| mv.into())
+        self.last_move.into()
+    }
+
+    #[no_mangle]
+    pub extern "C" fn PartialPosition_last_compact_move(&self) -> OptionCompactMove {
+        self.last_move
     }
 
     /// Makes a move. Note that this function will never check legality.
@@ -361,7 +407,7 @@ impl PartialPosition {
                 self.piece_set(to, Some(piece));
             }
         }
-        self.last_move = Some(mv);
+        self.last_move = Some(mv.into()).into();
         self.side = self.side.flip();
         self.ply = self.ply.wrapping_add(1);
         Some(())
@@ -387,6 +433,7 @@ impl PartialPosition {
             for j in 0..9 {
                 // Safety: the index is in range 0..81.
                 let current = *unsafe { self.board.get_unchecked(9 * (8 - j) + i) };
+                let current: Option<Piece> = current.into();
                 if let Some(occupying) = current {
                     if vacant > 0 {
                         sink.write_char((b'0' + vacant as u8) as char)?;

@@ -32,7 +32,7 @@ pub use crate::square::Square;
 pub use crate::piece_kind::PieceKind;
 
 #[doc(inline)]
-pub use crate::piece::Piece;
+pub use crate::piece::{OptionPiece, Piece};
 
 #[doc(inline)]
 pub use crate::mv::Move;
@@ -52,6 +52,11 @@ pub use crate::position::PartialPosition;
 #[cfg(feature = "alloc")]
 #[doc(inline)]
 pub use crate::position::Position;
+
+pub mod c_compat {
+    #[doc(inline)]
+    pub use crate::mv::OptionCompactMove;
+}
 
 #[cfg(test)]
 mod tests {

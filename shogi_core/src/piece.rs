@@ -19,6 +19,13 @@ use crate::{Color, PieceKind, ToUsi};
 // Internal representation: 1..=14: black, 17..=30: white
 pub struct Piece(NonZeroU8);
 
+/// <https://github.com/eqrion/cbindgen/issues/326>.
+#[repr(transparent)]
+#[derive(Eq, PartialEq, Clone, Copy, Debug)]
+#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
+#[cfg_attr(feature = "hash", derive(Hash))]
+pub struct OptionPiece(u8);
+
 impl Piece {
     /// Creates a new `Piece` from `PieceKind` and `Color`.
     #[must_use]
@@ -70,7 +77,7 @@ impl Piece {
     /// Promote a `Piece`. Same as `PieceKind::promote` with color.
     #[must_use]
     #[export_name = "Piece_promote"]
-    pub extern "C" fn promote(self) -> Option<Self> {
+    pub extern "C" fn promote(self) -> Option<Piece> {
         let (piece_kind, color) = self.to_parts();
         Some(Self::new(piece_kind.promote()?, color))
     }
@@ -78,7 +85,7 @@ impl Piece {
     /// Un-promote a `Piece`. Same as `PieceKind::unpromote` with color.
     #[must_use]
     #[export_name = "Piece_unpromote"]
-    pub extern "C" fn unpromote(self) -> Option<Self> {
+    pub extern "C" fn unpromote(self) -> Option<Piece> {
         let (piece_kind, color) = self.to_parts();
         Some(Self::new(piece_kind.unpromote()?, color))
     }
@@ -102,6 +109,22 @@ impl Piece {
             }
         }
         result
+    }
+}
+
+impl From<Option<Piece>> for OptionPiece {
+    #[inline(always)]
+    fn from(arg: Option<Piece>) -> Self {
+        Self(match arg {
+            Some(result) => result.0.get(),
+            None => 0,
+        })
+    }
+}
+
+impl From<OptionPiece> for Option<Piece> {
+    fn from(arg: OptionPiece) -> Self {
+        Some(Piece(NonZeroU8::new(arg.0)?))
     }
 }
 

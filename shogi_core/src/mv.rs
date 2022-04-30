@@ -135,6 +135,29 @@ impl CompactMove {
     }
 }
 
+/// <https://github.com/eqrion/cbindgen/issues/326>.
+#[repr(transparent)]
+#[derive(Eq, PartialEq, Clone, Copy, Debug)]
+#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
+#[cfg_attr(feature = "hash", derive(Hash))]
+pub struct OptionCompactMove(u16);
+
+impl From<Option<CompactMove>> for OptionCompactMove {
+    #[inline(always)]
+    fn from(arg: Option<CompactMove>) -> Self {
+        Self(match arg {
+            Some(result) => result.0.get(),
+            None => 0,
+        })
+    }
+}
+
+impl From<OptionCompactMove> for Option<CompactMove> {
+    fn from(arg: OptionCompactMove) -> Self {
+        Some(CompactMove(NonZeroU16::new(arg.0)?))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
