@@ -94,6 +94,28 @@ impl Position {
         self.inner.piece_bitboard(piece)
     }
 
+    /// Returns the last move, if it exists.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::Position;
+    /// assert_eq!(Position::startpos().last_move(), None);
+    /// ```
+    pub fn last_move(&self) -> Option<Move> {
+        self.inner.last_move
+    }
+
+    /// Returns the last move, if it exists.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::Position;
+    /// assert_eq!(Position::startpos().last_compact_move(), None);
+    /// ```
+    pub fn last_compact_move(&self) -> Option<CompactMove> {
+        self.inner.last_move.map(|mv| mv.into())
+    }
+
     /// Makes a move. Note that this function will never check legality.
     ///
     /// Returns Some(()) if the given move makes sense, i.e.,
@@ -269,6 +291,28 @@ impl PartialPosition {
             }
         }
         result
+    }
+
+    /// Returns the last move, if it exists.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::PartialPosition;
+    /// assert_eq!(PartialPosition::startpos().last_move(), None);
+    /// ```
+    pub fn last_move(&self) -> Option<Move> {
+        self.last_move
+    }
+
+    /// Returns the last move, if it exists.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::PartialPosition;
+    /// assert_eq!(PartialPosition::startpos().last_compact_move(), None);
+    /// ```
+    pub fn last_compact_move(&self) -> Option<CompactMove> {
+        self.last_move.map(|mv| mv.into())
     }
 
     /// Makes a move. Note that this function will never check legality.
