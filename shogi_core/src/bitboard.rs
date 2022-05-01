@@ -89,23 +89,9 @@ impl Bitboard {
     /// ```
     #[export_name = "Bitboard_flip"]
     pub extern "C" fn flip(self) -> Self {
-        let mut returned = [0u64; 2];
-        for index in 0..81 {
-            let value = 1 << (index % 64);
-            let overlap = if index < 64 {
-                self.0[0] & value
-            } else {
-                self.0[1] & value
-            };
-            if overlap != 0 {
-                let to = 80 - index;
-                if to >= 64 {
-                    returned[1] |= 1 << (to % 64);
-                } else {
-                    returned[0] |= 1 << to;
-                }
-            }
-        }
+        let fst_rev = (self.0[0] >> 17) | (self.0[1] << 47);
+        let snd_rev = self.0[0] << 47;
+        let returned = [fst_rev.reverse_bits(), snd_rev.reverse_bits()];
         Self(returned)
     }
 }
