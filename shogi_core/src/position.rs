@@ -1,10 +1,8 @@
 use core::fmt::{Result as FmtResult, Write};
 use core::mem::MaybeUninit;
 
-use crate::c_compat::OptionCompactMove;
-use crate::{
-    Bitboard, Color, CompactMove, Hand, Move, OptionPiece, Piece, PieceKind, Square, ToUsi,
-};
+use crate::c_compat::{OptionCompactMove, OptionPiece};
+use crate::{Bitboard, Color, CompactMove, Hand, Move, Piece, PieceKind, Square, ToUsi};
 
 /// A position. It provides sufficient data for legality checking.
 #[cfg(feature = "alloc")]

@@ -32,7 +32,7 @@ pub use crate::square::Square;
 pub use crate::piece_kind::PieceKind;
 
 #[doc(inline)]
-pub use crate::piece::{OptionPiece, Piece};
+pub use crate::piece::Piece;
 
 #[doc(inline)]
 pub use crate::mv::Move;
@@ -53,7 +53,14 @@ pub use crate::position::PartialPosition;
 #[doc(inline)]
 pub use crate::position::Position;
 
+/// Types that are exposed to C.
 pub mod c_compat {
+    #[doc(inline)]
+    pub use crate::piece_kind::OptionPieceKind;
+
+    #[doc(inline)]
+    pub use crate::piece::OptionPiece;
+
     #[doc(inline)]
     pub use crate::mv::OptionCompactMove;
 }
