@@ -10,6 +10,7 @@ extern crate alloc;
 mod bitboard;
 mod color;
 mod hand;
+mod legality;
 mod mv;
 #[cfg(not(feature = "std"))]
 mod no_std;
