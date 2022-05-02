@@ -1,4 +1,4 @@
-name: C bindings (shogi_core)
+name: C bindings (shogi_core_c)
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
   build:
     defaults:
       run:
-        working-directory: ./shogi_core
+        working-directory: ./shogi_core_c
 
     strategy:
       matrix:

@@ -609,20 +609,4 @@ uint8_t Square_relative_file(Square self, Color color);
  */
 uint8_t Square_relative_rank(Square self, Color color);
 
-#if !defined(DEFINE_STD)
-void __bzero(uint8_t *s, size_t n);
-#endif
-
-#if !defined(DEFINE_STD)
-int32_t memcmp(const uint8_t *s1, const uint8_t *s2, size_t n);
-#endif
-
-#if !defined(DEFINE_STD)
-uint8_t *memcpy(uint8_t *dest, const uint8_t *src, size_t n);
-#endif
-
-#if !defined(DEFINE_STD)
-uint8_t *memset(uint8_t *b, int32_t c, size_t n);
-#endif
-
 #endif /* shogi_core_bindings_h */
