@@ -32,8 +32,9 @@ impl Color {
         // 34 03  xorb $3, %al
         unsafe { core::mem::transmute(self as u8 ^ 3) }
     }
-    #[cfg(test)]
-    pub(crate) fn all() -> [Self; 2] {
+
+    /// Returns all possible `Color`s.
+    pub fn all() -> [Self; 2] {
         [Color::Black, Color::White]
     }
 }

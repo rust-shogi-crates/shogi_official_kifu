@@ -1,0 +1,34 @@
+[package]
+name = "shogi_legality_lite"
+version = "0.1.0"
+edition = "2021"
+categories = ["no-std"]
+
+[features]
+default = ["std"]
+alloc = ["shogi_core/alloc"]
+hash = ["shogi_core/hash"]
+ord = ["shogi_core/ord"]
+std = ["alloc", "shogi_core/std"]
+
+[lib]
+crate-type = [
+    "rlib",
+    "cdylib",
+]
+
+[dependencies]
+shogi_core = { path = "../shogi_core", default-features = false }
+
+[profile.dev]
+panic = "abort"
+debug = false
+
+[profile.release]
+opt-level = "z"
+panic = "abort"
+strip = "debuginfo" # "symbol" removes exported symbols, which renders the generated cdylib useless.
+
+[profile.release-speed]
+inherits = "release"
+opt-level = 3

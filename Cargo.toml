@@ -17,6 +17,7 @@ crate-type = [
 [dependencies]
 shogi = "0.12"
 shogi_core = { path = "./shogi_core" }
+shogi_legality_lite = { path = "./shogi_legality_lite" }
 
 [profile.dev]
 debug = false

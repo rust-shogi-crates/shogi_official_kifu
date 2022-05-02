@@ -17,6 +17,11 @@ pub struct Position {
 
 #[cfg(feature = "alloc")]
 impl Position {
+    /// Returns the inner `PartialPosition`.
+    pub fn inner(&self) -> &PartialPosition {
+        &self.inner
+    }
+
     pub fn startpos() -> Self {
         Self::arbitrary_position(PartialPosition::startpos())
     }

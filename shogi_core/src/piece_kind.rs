@@ -175,8 +175,8 @@ impl PieceKind {
         self.unpromote().into()
     }
 
-    #[cfg(test)]
-    pub(crate) fn all() -> [Self; 14] {
+    /// Returns all possible `PieceKind`s in the ascending order of their discriminants.
+    pub fn all() -> [Self; 14] {
         [
             PieceKind::Pawn,
             PieceKind::Lance,

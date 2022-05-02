@@ -95,16 +95,16 @@ impl Piece {
         Self(NonZeroU8::new_unchecked(value))
     }
 
-    #[cfg(test)]
-    pub(crate) fn all() -> [Self; 28] {
+    /// Returns all possible `Piece`s.
+    pub fn all() -> [Self; 28] {
         let mut result = [Self::new(PieceKind::Pawn, Color::Black); 28];
         let piece_kinds = PieceKind::all();
         let mut index = 0;
         let colors = Color::all();
         for &piece_kind in &piece_kinds {
             for &color in &colors {
-                // In tests we can panic.
-                result[index] = Piece::new(piece_kind, color);
+                // Safety: 0 <= index < 28
+                *unsafe { result.get_unchecked_mut(index) } = Piece::new(piece_kind, color);
                 index += 1;
             }
         }

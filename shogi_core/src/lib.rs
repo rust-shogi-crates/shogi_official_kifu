@@ -54,6 +54,9 @@ pub use crate::position::PartialPosition;
 #[doc(inline)]
 pub use crate::position::Position;
 
+#[doc(inline)]
+pub use crate::legality::{GameStatus, LegalityChecker};
+
 /// Types that are exposed to C.
 pub mod c_compat {
     #[doc(inline)]

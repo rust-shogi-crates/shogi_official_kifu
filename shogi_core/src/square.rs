@@ -101,10 +101,19 @@ impl Square {
         unsafe { Self::from_u8(82 - self.0.get()) }
     }
 
-    /// value must be in range 1..=81
+    /// Convert u8 to `Square`.
+    ///
+    ///  # Safety
+    /// `value` must be in range 1..=81
     #[inline(always)]
-    pub(crate) unsafe fn from_u8(value: u8) -> Self {
+    pub unsafe fn from_u8(value: u8) -> Self {
         Self(NonZeroU8::new_unchecked(value))
+    }
+
+    /// Returns an iterator that iterates over all possible `Square`s
+    /// in the ascending order of their indices.
+    pub fn all() -> impl core::iter::Iterator<Item = Self> {
+        (1..=81).map(|index| unsafe { Self::from_u8(index) })
     }
 }
 
