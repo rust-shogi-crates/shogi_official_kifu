@@ -15,7 +15,7 @@ jobs:
   build:
     defaults:
       run:
-        working-directory: ./shogi_legality_lite
+        working-directory: ./shogi_legality_lite_c
 
     strategy:
       matrix:

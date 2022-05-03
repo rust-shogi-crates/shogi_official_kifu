@@ -1,23 +1,21 @@
 [package]
-name = "shogi_legality_lite"
+name = "shogi_legality_lite_c"
 version = "0.1.0"
 edition = "2021"
 categories = ["no-std"]
 
 [features]
 default = ["std"]
-alloc = ["shogi_core/alloc"]
-hash = ["shogi_core/hash"]
-ord = ["shogi_core/ord"]
-std = ["alloc", "shogi_core/std"]
+alloc = ["shogi_legality_lite/alloc"]
+std = ["shogi_legality_lite/std"]
 
 [lib]
 crate-type = [
-    "rlib",
+    "cdylib",
 ]
 
 [dependencies]
-shogi_core = { path = "../shogi_core", default-features = false }
+shogi_legality_lite = { path = "../shogi_legality_lite", default-features = false }
 
 [profile.dev]
 panic = "abort"
