@@ -10,36 +10,31 @@ extern crate alloc;
 #[cfg(not(feature = "std"))]
 mod no_std;
 
-use shogi_core::{LegalityChecker, Move, Piece, Square};
+use shogi_core::{GameStatus, LegalityChecker, Move, PartialPosition};
 
 pub struct LiteLegalityChecker;
 
 impl LegalityChecker for LiteLegalityChecker {
     #[allow(unused)]
     #[cfg(feature = "alloc")]
-    fn status(&self, position: &shogi_core::Position) -> shogi_core::GameStatus {
+    fn status(&self, position: &shogi_core::Position) -> GameStatus {
         todo!()
     }
 
     #[allow(unused)]
-    fn status_partial(&self, position: &shogi_core::PartialPosition) -> shogi_core::GameStatus {
+    fn status_partial(&self, position: &PartialPosition) -> GameStatus {
         todo!()
     }
 
     #[allow(unused)]
-    fn is_legal_partial(
-        &self,
-        position: &shogi_core::PartialPosition,
-        mv: shogi_core::Move,
-    ) -> bool {
+    fn is_legal_partial(&self, position: &PartialPosition, mv: Move) -> bool {
         todo!()
     }
 
     #[cfg(feature = "alloc")]
-    fn all_legal_moves_partial(
-        &self,
-        position: &shogi_core::PartialPosition,
-    ) -> alloc::vec::Vec<shogi_core::Move> {
+    fn all_legal_moves_partial(&self, position: &PartialPosition) -> alloc::vec::Vec<Move> {
+        use shogi_core::Square;
+
         let mut result = alloc::vec::Vec::new();
         for from in Square::all() {
             for to in Square::all() {
@@ -51,7 +46,7 @@ impl LegalityChecker for LiteLegalityChecker {
                 }
             }
         }
-        for piece in Piece::all() {
+        for piece in shogi_core::Piece::all() {
             for to in Square::all() {
                 let mv = Move::Drop { piece, to };
                 if self.is_legal_partial(position, mv) {
