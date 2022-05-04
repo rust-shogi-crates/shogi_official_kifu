@@ -28,6 +28,32 @@ impl Square {
         }))
     }
 
+    /// Creates a new `Square` with given `file`, `rank` and `color`.
+    ///
+    /// `file` and `rank` must be between 1 and 9 (both inclusive).
+    /// If this condition is not met, this function returns None.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::{Color, Square};
+    /// assert_eq!(Square::new_relative(3, 4, Color::Black), Square::new(3, 4));
+    /// assert_eq!(Square::new_relative(3, 4, Color::White), Square::new(7, 6));
+    /// ```
+    #[export_name = "Square_new_relative"]
+    pub extern "C" fn new_relative(file: u8, rank: u8, color: Color) -> Option<Self> {
+        if file.wrapping_sub(1) >= 9 || rank.wrapping_sub(1) >= 9 {
+            return None;
+        }
+        // Safety: file >= 1 && rank >= 1 implies 1 <= file * 9 + rank - 9 <= 81
+        let relative_index = file * 9 + rank - 9;
+        Some(Square(unsafe {
+            NonZeroU8::new_unchecked(match color {
+                Color::Black => relative_index,
+                Color::White => 82 - relative_index,
+            })
+        }))
+    }
+
     /// Finds the file in range `1..=9`.
     ///
     /// Examples:
@@ -35,7 +61,6 @@ impl Square {
     /// use shogi_core::Square;
     /// assert_eq!(Square::new(3, 4).unwrap().file(), 3);
     /// ```
-
     #[export_name = "Square_file"]
     pub extern "C" fn file(self) -> u8 {
         (self.0.get() + 8) / 9
@@ -140,6 +165,18 @@ mod tests {
                     assert_eq!(sq.relative_file(Color::White), 10 - file);
                     assert_eq!(sq.relative_rank(Color::White), 10 - rank);
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn new_relative_works() {
+        for file in 1..=9 {
+            for rank in 1..=9 {
+                let sq = Square::new_relative(file, rank, Color::Black).unwrap();
+                assert_eq!(sq, Square::new(file, rank).unwrap());
+                let sq = Square::new_relative(file, rank, Color::White).unwrap();
+                assert_eq!(sq, Square::new(10 - file, 10 - rank).unwrap());
             }
         }
     }

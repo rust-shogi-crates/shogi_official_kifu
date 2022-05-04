@@ -589,6 +589,21 @@ uint8_t Square_index(Square self);
 struct Option_Square Square_new(uint8_t file, uint8_t rank);
 
 /**
+ * Creates a new `Square` with given `file`, `rank` and `color`.
+ *
+ * `file` and `rank` must be between 1 and 9 (both inclusive).
+ * If this condition is not met, this function returns None.
+ *
+ * Examples:
+ * ```
+ * use shogi_core::{Color, Square};
+ * assert_eq!(Square::new_relative(3, 4, Color::Black), Square::new(3, 4));
+ * assert_eq!(Square::new_relative(3, 4, Color::White), Square::new(7, 6));
+ * ```
+ */
+struct Option_Square Square_new_relative(uint8_t file, uint8_t rank, Color color);
+
+/**
  * Finds the rank in range `1..=9`.
  *
  * Examples:

@@ -10,4 +10,11 @@
 #include <stdlib.h>
 
 
+/**
+ * Checks if the normal move is legal.
+ *
+ * `piece` is given as a hint and `position.piece_at(from) == Some(piece)` must hold.
+ */
+bool legality_normal_check(const PartialPosition *position, Piece piece, Square from, Square to);
+
 #endif /* shogi_core_bindings_h */

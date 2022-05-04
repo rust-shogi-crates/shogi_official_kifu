@@ -110,6 +110,11 @@ macro_rules! define_bit_trait {
                 *self = *self $op rhs;
             }
         }
+        impl $assign_trait<Square> for Bitboard {
+            fn $assign_funname(&mut self, rhs: Square) {
+                *self = *self $op Bitboard::single(rhs);
+            }
+        }
 
         #[no_mangle]
         pub extern "C" fn $exported_name(a: Bitboard, b: Bitboard) -> Bitboard {
