@@ -64,6 +64,15 @@ pub fn check(position: &PartialPosition, mv: Move) -> bool {
             if rel_rank == 2 && piece.piece_kind() == PieceKind::Knight {
                 return false;
             }
+            // Does a drop-pawn-mate (`打ち歩詰め`, *uchifu-zume*) happen?
+            if piece.piece_kind() == PieceKind::Pawn {
+                let mut next = position.clone();
+                let result = next.make_move(mv); // always Some(())
+                debug_assert_eq!(result, Some(()));
+                if is_mate(&next) != Some(false) {
+                    return false;
+                }
+            }
             true
         }
     }
@@ -113,4 +122,18 @@ fn king_position(position: &PartialPosition, color: Color) -> Option<Square> {
         }
     }
     None
+}
+
+// The king does not need to be in check.
+fn is_mate(position: &PartialPosition) -> Option<bool> {
+    let all = all_legal_moves(position);
+    for mv in all {
+        let mut next = position.clone();
+        let result = next.make_move(mv);
+        debug_assert_eq!(result, Some(()));
+        if !will_king_be_captured(&next)? {
+            return Some(false);
+        }
+    }
+    Some(true)
 }
