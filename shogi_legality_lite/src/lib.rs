@@ -5,6 +5,9 @@ extern crate alloc;
 
 use shogi_core::{GameStatus, LegalityChecker, Move, PartialPosition};
 
+mod normal;
+mod prelegality;
+
 pub struct LiteLegalityChecker;
 
 impl LegalityChecker for LiteLegalityChecker {
@@ -19,9 +22,18 @@ impl LegalityChecker for LiteLegalityChecker {
         todo!()
     }
 
-    #[allow(unused)]
     fn is_legal_partial(&self, position: &PartialPosition, mv: Move) -> bool {
-        todo!()
+        if !prelegality::check(position, mv) {
+            return false;
+        }
+        let mut next = position.clone();
+        if next.make_move(mv).is_none() {
+            return false;
+        }
+        if prelegality::will_king_be_captured(&next) != Some(false) {
+            return false;
+        }
+        true
     }
 
     #[cfg(feature = "alloc")]
