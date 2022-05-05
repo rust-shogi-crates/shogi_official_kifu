@@ -1,4 +1,4 @@
-#![no_std] // Forbids using std::*.
+#![cfg_attr(not(test), no_std)] // Forbids using std::*.
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -65,9 +65,12 @@ impl LegalityChecker for LiteLegalityChecker {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+    fn all_legal_moves_partial_works() {
+        let position = PartialPosition::startpos();
+        let first_moves = LiteLegalityChecker.all_legal_moves_partial(&position);
+        assert_eq!(first_moves.len(), 30);
     }
 }

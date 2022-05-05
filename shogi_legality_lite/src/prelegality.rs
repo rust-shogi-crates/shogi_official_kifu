@@ -34,11 +34,18 @@ pub fn check(position: &PartialPosition, mv: Move) -> bool {
             if rel_rank == 2 && from_piece.piece_kind() == PieceKind::Knight && !promote {
                 return false;
             }
+            // Can promote?
+            if promote && from.relative_rank(side) > 3 && to.relative_rank(side) > 3 {
+                return false;
+            }
             // Is the move valid?
             crate::normal::check(position, from_piece, from, to)
         }
         Move::Drop { piece, to } => {
             // Does `side` have a piece?
+            if piece.color() != side {
+                return false;
+            }
             let remaining = if let Some(x) = position.hand(piece) {
                 x
             } else {
@@ -106,6 +113,9 @@ pub fn will_king_be_captured(position: &PartialPosition) -> Option<bool> {
         } else {
             continue;
         };
+        if piece.color() != side {
+            continue;
+        }
         if crate::normal::check(position, piece, from, king) {
             return Some(true);
         }

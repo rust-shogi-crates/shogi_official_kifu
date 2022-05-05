@@ -569,6 +569,27 @@ uint8_t Square_file(Square self);
 Square Square_flip(Square self);
 
 /**
+ * Converts u8 to `Square`. If `value` is not in range `1..=81`, this function returns `None`.
+ *
+ * Examples:
+ * ```
+ * use shogi_core::Square;
+ * assert_eq!(Square::from_u8(21), Square::new(3, 3));
+ * assert_eq!(Square::from_u8(0), None);
+ * assert_eq!(Square::from_u8(82), None);
+ * ```
+ */
+struct Option_Square Square_from_u8(uint8_t value);
+
+/**
+ * Converts u8 to `Square` without checking.
+ *
+ * # Safety
+ * `value` must be in range 1..=81
+ */
+Square Square_from_u8_unchecked(uint8_t value);
+
+/**
  * Finds the index of `self` in range `1..=81`.
  * It is guaranteed that the result is equal to the internal representation, 9 * file + rank - 9.
  *
@@ -623,5 +644,20 @@ uint8_t Square_relative_file(Square self, Color color);
  * Finds the rank from the perspective of `color`.
  */
 uint8_t Square_relative_rank(Square self, Color color);
+
+/**
+ * Shifts `self` by the given arguments. If the result would be out of the board, this function returns `None`.
+ *
+ * Examples:
+ * ```
+ * use shogi_core::Square;
+ * assert_eq!(Square::new(3, 3).unwrap().shift(-1, 3), Square::new(2, 6));
+ * assert_eq!(Square::new(8, 4).unwrap().shift(0, -3), Square::new(8, 1));
+ * assert_eq!(Square::new(3, 3).unwrap().shift(-4, 3), None);
+ * ```
+ */
+struct Option_Square Square_shift(Square self,
+                                  int8_t file_delta,
+                                  int8_t rank_delta);
 
 #endif /* shogi_core_bindings_h */

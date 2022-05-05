@@ -91,7 +91,7 @@ impl From<CompactMove> for Move {
         } else {
             let from = ((inner >> 8) & 127) as u8;
             // Safety: for all valid `CompactMove` which is normal, the part masked by 0x7f00 represents a valid square.
-            let from = unsafe { Square::from_u8(from) };
+            let from = unsafe { Square::from_u8_unchecked(from) };
             let promote = (inner & 32768) != 0;
             Move::Normal { from, to, promote }
         }
@@ -109,7 +109,7 @@ impl CompactMove {
         } else {
             let from = ((inner >> 8) & 127) as u8;
             // Safety: for all valid `CompactMove` which is normal, the part masked by 0x7f00 represents a valid square.
-            Some(unsafe { Square::from_u8(from) })
+            Some(unsafe { Square::from_u8_unchecked(from) })
         }
     }
 
@@ -118,7 +118,7 @@ impl CompactMove {
     pub extern "C" fn to(self) -> Square {
         let to = (self.0.get() & 127) as u8;
         // Safety: for all valid `CompactMove`, the least 7 bits represent a valid square.
-        unsafe { Square::from_u8(to) }
+        unsafe { Square::from_u8_unchecked(to) }
     }
 
     /// Finds whether `self` promotes a piece.
@@ -166,9 +166,9 @@ mod tests {
     fn from_into_works() {
         // normal moves
         for from in 1..=81 {
-            let from = unsafe { Square::from_u8(from) };
+            let from = unsafe { Square::from_u8_unchecked(from) };
             for to in 1..=81 {
-                let to = unsafe { Square::from_u8(to) };
+                let to = unsafe { Square::from_u8_unchecked(to) };
                 for &promote in &[false, true] {
                     let mv = Move::Normal { from, to, promote };
                     let compact: CompactMove = mv.into();
@@ -180,7 +180,7 @@ mod tests {
         // drop moves
         for piece in Piece::all() {
             for to in 1..=81 {
-                let to = unsafe { Square::from_u8(to) };
+                let to = unsafe { Square::from_u8_unchecked(to) };
                 let mv = Move::Drop { piece, to };
                 let compact: CompactMove = mv.into();
                 let mv2: Move = compact.into();

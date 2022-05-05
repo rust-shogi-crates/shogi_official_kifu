@@ -302,7 +302,7 @@ impl PartialPosition {
         let mut result = Bitboard::empty();
         for i in 0..81 {
             if Option::<Piece>::from(self.board[i]).is_none() {
-                let square = unsafe { Square::from_u8(i as u8 + 1) };
+                let square = unsafe { Square::from_u8_unchecked(i as u8 + 1) };
                 result |= Bitboard::single(square);
             }
         }
@@ -316,7 +316,7 @@ impl PartialPosition {
         for i in 0..81 {
             if let Some(piece) = Option::<Piece>::from(self.board[i]) {
                 if piece.color() == color {
-                    let square = unsafe { Square::from_u8(i as u8 + 1) };
+                    let square = unsafe { Square::from_u8_unchecked(i as u8 + 1) };
                     result |= Bitboard::single(square);
                 }
             }
@@ -330,7 +330,7 @@ impl PartialPosition {
         let mut result = Bitboard::empty();
         for i in 0..81 {
             if self.board[i] == Some(piece).into() {
-                let square = unsafe { Square::from_u8(i as u8 + 1) };
+                let square = unsafe { Square::from_u8_unchecked(i as u8 + 1) };
                 result |= Bitboard::single(square);
             }
         }

@@ -123,22 +123,64 @@ impl Square {
     #[export_name = "Square_flip"]
     pub extern "C" fn flip(self) -> Self {
         // Safety: self.0.get() is in range 1..=81.
-        unsafe { Self::from_u8(82 - self.0.get()) }
+        unsafe { Self::from_u8_unchecked(82 - self.0.get()) }
     }
 
-    /// Convert u8 to `Square`.
+    /// Converts u8 to `Square`. If `value` is not in range `1..=81`, this function returns `None`.
     ///
-    ///  # Safety
+    /// Examples:
+    /// ```
+    /// use shogi_core::Square;
+    /// assert_eq!(Square::from_u8(21), Square::new(3, 3));
+    /// assert_eq!(Square::from_u8(0), None);
+    /// assert_eq!(Square::from_u8(82), None);
+    /// ```
+    #[inline]
+    #[export_name = "Square_from_u8"]
+    pub extern "C" fn from_u8(value: u8) -> Option<Self> {
+        if matches!(value, 1..=81) {
+            // Safety: `value` is in range `1..=81`.
+            Some(unsafe { Self::from_u8_unchecked(value) })
+        } else {
+            None
+        }
+    }
+
+    /// Converts u8 to `Square` without checking.
+    ///
+    /// # Safety
     /// `value` must be in range 1..=81
     #[inline(always)]
-    pub unsafe fn from_u8(value: u8) -> Self {
+    #[export_name = "Square_from_u8_unchecked"]
+    pub unsafe extern "C" fn from_u8_unchecked(value: u8) -> Self {
         Self(NonZeroU8::new_unchecked(value))
+    }
+
+    /// Shifts `self` by the given arguments. If the result would be out of the board, this function returns `None`.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::Square;
+    /// assert_eq!(Square::new(3, 3).unwrap().shift(-1, 3), Square::new(2, 6));
+    /// assert_eq!(Square::new(8, 4).unwrap().shift(0, -3), Square::new(8, 1));
+    /// assert_eq!(Square::new(3, 3).unwrap().shift(-4, 3), None);
+    /// ```
+    #[export_name = "Square_shift"]
+    pub extern "C" fn shift(self, file_delta: i8, rank_delta: i8) -> Option<Self> {
+        // TODO: some optimization
+        // Computing in i32 to avoid overflow
+        let file = self.file() as i32 + file_delta as i32;
+        let rank = self.rank() as i32 + rank_delta as i32;
+        if file <= 0 || rank <= 0 || file >= 10 || rank >= 10 {
+            return None;
+        }
+        Self::new(file as u8, rank as u8)
     }
 
     /// Returns an iterator that iterates over all possible `Square`s
     /// in the ascending order of their indices.
     pub fn all() -> impl core::iter::Iterator<Item = Self> {
-        (1..=81).map(|index| unsafe { Self::from_u8(index) })
+        (1..=81).map(|index| unsafe { Self::from_u8_unchecked(index) })
     }
 }
 
@@ -187,6 +229,22 @@ mod tests {
             for rank in 1..=9 {
                 let sq = Square::new(file, rank).unwrap();
                 assert_eq!(sq.flip(), Square::new(10 - file, 10 - rank).unwrap());
+            }
+        }
+    }
+
+    #[test]
+    fn shift_works() {
+        for file in 1..=9 {
+            for rank in 1..=9 {
+                let sq = Square::new(file, rank).unwrap();
+                // Exhaustive check: `shift` does not panic
+                for file_delta in -128..127 {
+                    for rank_delta in -128..127 {
+                        let result = sq.shift(file_delta, rank_delta);
+                        assert_eq!(result, result);
+                    }
+                }
             }
         }
     }

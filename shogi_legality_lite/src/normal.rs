@@ -27,7 +27,16 @@ pub fn attacking(position: &PartialPosition, piece: Piece, from: Square) -> Bitb
             | PieceKind::ProBishop
             | PieceKind::ProRook
     ) {
-        todo!();
+        let occupied = !position.vacant_bitboard();
+        let range = match piece.piece_kind() {
+            PieceKind::Lance => lance_range(piece.color(), from, occupied),
+            PieceKind::Bishop => bishop_range(from, occupied),
+            PieceKind::Rook => rook_range(from, occupied),
+            PieceKind::ProBishop => bishop_range(from, occupied) | king(from),
+            PieceKind::ProRook => rook_range(from, occupied) | king(from),
+            _ => unreachable!(),
+        };
+        return range & !position.player_bitboard(piece.color());
     }
     // `piece` is short-range, i.e., no blocking is possible
     // no need to consider the possibility of blockading by pieces
@@ -56,19 +65,20 @@ unsafe fn short_range(piece: Piece, from: Square) -> Bitboard {
 }
 
 // If `from` is on the 9th row (i.e., a pawn cannot move), the result is unspecified.
+// That being said, since this function is not marked unsafe, this cannot cause UB.
 fn pawn(color: Color, from: Square) -> Bitboard {
     let index = from.index();
     match color {
         Color::Black => {
             if index > 1 {
-                Bitboard::single(unsafe { Square::from_u8(index - 1) })
+                Bitboard::single(unsafe { Square::from_u8_unchecked(index - 1) })
             } else {
                 Bitboard::empty()
             }
         }
         Color::White => {
             if index < 81 {
-                Bitboard::single(unsafe { Square::from_u8(index + 1) })
+                Bitboard::single(unsafe { Square::from_u8_unchecked(index + 1) })
             } else {
                 Bitboard::empty()
             }
@@ -155,6 +165,46 @@ fn king(from: Square) -> Bitboard {
     result
 }
 
+fn lance_range(color: Color, from: Square, occupied: Bitboard) -> Bitboard {
+    let direction = match color {
+        Color::Black => (0, -1),
+        Color::White => (0, 1),
+    };
+    long_range(from, occupied, direction)
+}
+
+fn bishop_range(from: Square, occupied: Bitboard) -> Bitboard {
+    let directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)];
+    let mut result = Bitboard::empty();
+    for direction in directions {
+        result |= long_range(from, occupied, direction);
+    }
+    result
+}
+
+fn rook_range(from: Square, occupied: Bitboard) -> Bitboard {
+    let directions = [(0, 1), (0, -1), (1, 0), (-1, 0)];
+    let mut result = Bitboard::empty();
+    for direction in directions {
+        result |= long_range(from, occupied, direction);
+    }
+    result
+}
+
+fn long_range(from: Square, occupied: Bitboard, (file_delta, rank_delta): (i8, i8)) -> Bitboard {
+    let mut result = Bitboard::empty();
+    let mut current = from;
+    while let Some(next) = current.shift(file_delta, rank_delta) {
+        // `result` includes the blocking piece's square.
+        result |= next;
+        if occupied.contains(next) {
+            break;
+        }
+        current = next;
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -176,6 +226,7 @@ mod tests {
         for color in Color::all() {
             for square in Square::all() {
                 if square.relative_rank(color) == 1 {
+                    let _ = super::pawn(color, square);
                     continue;
                 }
                 let result = super::pawn(color, square);
@@ -287,6 +338,45 @@ mod tests {
         let king_square = Square::new(5, 9).unwrap();
         let attacking = attacking(&position, king, king_square);
         let expected = single(4, 8) | single(5, 8) | single(6, 8);
+        assert_eq!(attacking, expected);
+    }
+
+    #[test]
+    fn bishop_moves_are_correct() {
+        use shogi_core::Move;
+
+        let mut position = PartialPosition::startpos();
+        let moves = [
+            Move::Normal {
+                from: Square::new(7, 7).unwrap(),
+                to: Square::new(7, 6).unwrap(),
+                promote: false,
+            },
+            Move::Normal {
+                from: Square::new(3, 3).unwrap(),
+                to: Square::new(3, 4).unwrap(),
+                promote: false,
+            },
+        ];
+        for mv in moves {
+            position.make_move(mv).unwrap();
+        }
+        let bishop = Piece::new(PieceKind::Bishop, Color::Black);
+        let bishop_square = Square::new(8, 8).unwrap();
+        let attacking = attacking(&position, bishop, bishop_square);
+        let expected =
+            single(2, 2) | single(3, 3) | single(4, 4) | single(5, 5) | single(6, 6) | single(7, 7);
+        assert_eq!(attacking, expected);
+    }
+
+    #[test]
+    fn rook_moves_are_correct() {
+        let position = PartialPosition::startpos();
+        let rook = Piece::new(PieceKind::Rook, Color::Black);
+        let rook_square = Square::new(2, 8).unwrap();
+        let attacking = attacking(&position, rook, rook_square);
+        let expected =
+            single(1, 8) | single(3, 8) | single(4, 8) | single(5, 8) | single(6, 8) | single(7, 8);
         assert_eq!(attacking, expected);
     }
 }
