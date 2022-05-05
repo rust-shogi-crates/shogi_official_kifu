@@ -185,6 +185,8 @@ impl Position {
 ///
 /// This data is insufficient for complete legality checking (such as repetition checking),
 /// but in most cases it suffices. If you need a complete legality checking, use `Position`.
+///
+/// TODO: describe exactly when a position is considered valid
 #[derive(Eq, PartialEq, Clone, Debug)]
 #[repr(C)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -299,6 +301,7 @@ impl PartialPosition {
     /// Finds the subset of squares with no pieces.
     #[export_name = "PartialPosition_vacant_bitboard"]
     pub extern "C" fn vacant_bitboard(&self) -> Bitboard {
+        // TODO: optimize to allow O(1)-time retrieval
         let mut result = Bitboard::empty();
         for i in 0..81 {
             if Option::<Piece>::from(self.board[i]).is_none() {
@@ -312,6 +315,7 @@ impl PartialPosition {
     /// Finds the subset of squares where a piece of the specified player is placed.
     #[export_name = "PartialPosition_player_bitboard"]
     pub extern "C" fn player_bitboard(&self, color: Color) -> Bitboard {
+        // TODO: optimize to allow O(1)-time retrieval
         let mut result = Bitboard::empty();
         for i in 0..81 {
             if let Some(piece) = Option::<Piece>::from(self.board[i]) {
@@ -327,6 +331,7 @@ impl PartialPosition {
     /// Finds the subset of squares where a piece is placed.
     #[export_name = "PartialPosition_piece_bitboard"]
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
+        // TODO: optimize to allow O(1)-time retrieval
         let mut result = Bitboard::empty();
         for i in 0..81 {
             if self.board[i] == Some(piece).into() {

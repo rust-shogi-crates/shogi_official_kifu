@@ -138,6 +138,11 @@ impl Square {
     #[inline]
     #[export_name = "Square_from_u8"]
     pub extern "C" fn from_u8(value: u8) -> Option<Self> {
+        // The shortest possible machine code for this function in x86_64 (System V AMD64 ABI) is:
+        // 31 c0    xorl %eax, %eax
+        // 83 ff 52 cmpl $82, %edi
+        // 0f 42 c7 cmovbl %edi, %eax
+        // TODO achieve this
         if matches!(value, 1..=81) {
             // Safety: `value` is in range `1..=81`.
             Some(unsafe { Self::from_u8_unchecked(value) })

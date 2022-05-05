@@ -231,6 +231,8 @@ typedef uint16_t OptionCompactMove;
  *
  * This data is insufficient for complete legality checking (such as repetition checking),
  * but in most cases it suffices. If you need a complete legality checking, use `Position`.
+ *
+ * TODO: describe exactly when a position is considered valid
  */
 typedef struct PartialPosition {
   Color side;
