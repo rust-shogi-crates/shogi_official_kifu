@@ -1,0 +1,31 @@
+[package]
+name = "shogi_usi_parser_c"
+version = "0.1.0"
+edition = "2021"
+categories = ["no-std"]
+
+[features]
+default = ["std"]
+alloc = ["shogi_usi_parser/alloc"]
+std = ["shogi_usi_parser/std"]
+
+[lib]
+crate-type = [
+    "cdylib",
+]
+
+[dependencies]
+shogi_usi_parser = { path = "../shogi_usi_parser", default-features = false }
+
+[profile.dev]
+panic = "abort"
+debug = false
+
+[profile.release]
+opt-level = "z"
+panic = "abort"
+strip = "debuginfo" # "symbol" removes exported symbols, which renders the generated cdylib useless.
+
+[profile.release-speed]
+inherits = "release"
+opt-level = 3

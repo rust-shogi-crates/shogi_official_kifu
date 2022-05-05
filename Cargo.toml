@@ -18,6 +18,7 @@ crate-type = [
 shogi = "0.12"
 shogi_core = { path = "./shogi_core" }
 shogi_legality_lite = { path = "./shogi_legality_lite" }
+shogi_usi_parser = { path = "./shogi_usi_parser" }
 
 [profile.dev]
 debug = false
