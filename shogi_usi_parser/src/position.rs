@@ -3,6 +3,15 @@ use shogi_core::{Color, Hand, PartialPosition, Piece, Square};
 
 use crate::{try_with_progress, Error, FromUsi, Result};
 
+#[cfg(feature = "alloc")]
+impl FromUsi for shogi_core::Position {
+    fn parse_usi_slice(s: &[u8]) -> Result<(&[u8], Self)> {
+        let (s, partial) = crate::bind!(PartialPosition::parse_usi_slice(s));
+        // TODO handle moves
+        Ok((s, shogi_core::Position::arbitrary_position(partial)))
+    }
+}
+
 /// ```
 /// # use shogi_core::{Color, PartialPosition, Piece, PieceKind};
 /// use shogi_usi_parser::FromUsi;

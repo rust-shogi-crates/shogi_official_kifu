@@ -1,10 +1,10 @@
-use shogi::{Bitboard, Color, PieceType, Position, Square};
+use shogi_core::{Bitboard, Color, PartialPosition, PieceKind, Square};
 
 use core::fmt::Write;
 use std::cmp::Ordering;
 
 pub fn run<W: Write>(
-    position: &Position,
+    position: &PartialPosition,
     from: Square,
     to: Square,
     candidates: Bitboard,
@@ -36,7 +36,7 @@ pub fn run<W: Write>(
         w.write_char(char1)?;
         return Ok(Some(()));
     }
-    if (&subset1 & &subset2).count() == 1 {
+    if (subset1 & subset2).count() == 1 {
         w.write_char(char1)?;
         w.write_char(char2)?;
         return Ok(Some(()));
@@ -45,7 +45,7 @@ pub fn run<W: Write>(
 }
 
 fn run_move(
-    position: &Position,
+    position: &PartialPosition,
     from: Square,
     to: Square,
     candidates: Bitboard,
@@ -72,19 +72,19 @@ fn run_move(
 }
 
 fn run_file(
-    position: &Position,
+    position: &PartialPosition,
     from: Square,
     to: Square,
     candidates: Bitboard,
 ) -> Option<(Bitboard, char)> {
     let side = position.side_to_move();
-    let piece_type = (*position.piece_at(from))?.piece_type;
-    if is_gold_like(piece_type) {
+    let piece_kind = position.piece_at(from)?.piece_kind();
+    if is_gold_like(piece_kind) {
         // Use |from.file() - to.file()| to disambiguate.
         let file_diff = from.file() as i8 - to.file() as i8;
         if file_diff == 0 && from.relative_rank(side) as i8 - to.relative_rank(side) as i8 > 0 {
             // We should use '直' for this particular case.
-            return Some((&Bitboard::empty() | from, '直'));
+            return Some((Bitboard::single(from), '直'));
         }
         let file_diff_relative = file_diff * if side == Color::Black { 1 } else { -1 };
         let horizontal = match file_diff_relative.cmp(&0) {
@@ -107,8 +107,9 @@ fn run_file(
         return Some((candidates, '壱'));
     }
     let mut candidates_cp = candidates;
-    let cand1 = candidates_cp.pop();
-    let cand2 = candidates_cp.pop();
+    // TODO stop panicking
+    let cand1 = candidates_cp.pop().unwrap();
+    let cand2 = candidates_cp.pop().unwrap();
     if cand1.file() == cand2.file() {
         return Some((candidates, '？'));
     }
@@ -121,13 +122,13 @@ fn run_file(
     } else {
         return Some((Bitboard::empty(), '無'));
     };
-    Some((&Bitboard::empty() | from, relative_file))
+    Some((Bitboard::single(from), relative_file))
 }
 
-fn is_gold_like(piece_type: PieceType) -> bool {
-    use PieceType::*;
+fn is_gold_like(piece_kind: PieceKind) -> bool {
+    use PieceKind::*;
     matches!(
-        piece_type,
+        piece_kind,
         Gold | Silver | ProPawn | ProLance | ProKnight | ProSilver,
     )
 }

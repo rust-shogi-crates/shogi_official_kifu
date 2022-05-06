@@ -317,6 +317,22 @@ struct Bitboard Bitboard_empty(void);
 struct Bitboard Bitboard_flip(struct Bitboard self);
 
 /**
+ * Checks if `self` is an empty set.
+ *
+ * Equivalent to `self.count() == 0`, but this function is faster.
+ *
+ * Examples:
+ * ```
+ * use shogi_core::{Bitboard, Square};
+ * let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
+ * let sq55 = Bitboard::single(Square::new(5, 5).unwrap());
+ * assert!(!(sq11 | sq55).is_empty());
+ * assert!(Bitboard::empty().is_empty());
+ * ```
+ */
+bool Bitboard_is_empty(struct Bitboard self);
+
+/**
  * C interface of `Bitboard::not`.
  */
 struct Bitboard Bitboard_not(struct Bitboard a);

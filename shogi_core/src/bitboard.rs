@@ -57,6 +57,23 @@ impl Bitboard {
         (self.0[0].count_ones() + self.0[1].count_ones()) as u8
     }
 
+    /// Checks if `self` is an empty set.
+    ///
+    /// Equivalent to `self.count() == 0`, but this function is faster.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::{Bitboard, Square};
+    /// let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
+    /// let sq55 = Bitboard::single(Square::new(5, 5).unwrap());
+    /// assert!(!(sq11 | sq55).is_empty());
+    /// assert!(Bitboard::empty().is_empty());
+    /// ```
+    #[export_name = "Bitboard_is_empty"]
+    pub extern "C" fn is_empty(self) -> bool {
+        self.0 == [0; 2]
+    }
+
     /// Finds if `self` as a subset contains `square`.
     ///
     /// Examples:
@@ -93,6 +110,33 @@ impl Bitboard {
         let snd_rev = self.0[0] << 47;
         let returned = [fst_rev.reverse_bits(), snd_rev.reverse_bits()];
         Self(returned)
+    }
+
+    /// If `self` is not empty, find a square in `self` and returns it.
+    ///
+    /// The returned value is unspecified.
+    pub fn pop(&mut self) -> Option<Square> {
+        // TODO: optimize
+        for i in 1..=81 {
+            let square = unsafe { Square::from_u8_unchecked(i) };
+            if self.contains(square) {
+                *self ^= square;
+                return Some(square);
+            }
+        }
+        None
+    }
+}
+
+impl Iterator for Bitboard {
+    type Item = Square;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.pop()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (0, Some(81))
     }
 }
 
