@@ -3,13 +3,17 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-use shogi_core::{Move, PartialPosition, Piece, Square};
+use shogi_core::{Color, Hand, Move, PartialPosition, Piece, Square};
 
+mod color;
 mod error;
+mod hand;
 mod mv;
 mod piece;
+mod position;
 mod square;
 
+// Equivalent to the `?` operator. Avoids `From` impl lookup.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! bind {
@@ -21,6 +25,7 @@ macro_rules! bind {
     };
 }
 
+// `?` operator with shifting indices in `InvalidInput`.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! try_with_progress {
@@ -47,10 +52,10 @@ macro_rules! try_with_progress {
 pub trait FromUsi: private::Sealed + Sized {
     /// Primitive parsing method. This crate handles implementing this method.
     #[doc(hidden)]
-    fn parse_usi_slice(s: &[u8]) -> core::result::Result<(&[u8], Self), Error>;
+    fn parse_usi_slice(s: &[u8]) -> Result<(&[u8], Self)>;
 
     /// Parses USI representation.
-    fn from_usi(s: &str) -> core::result::Result<Self, Error> {
+    fn from_usi(s: &str) -> Result<Self> {
         let s = s.as_bytes();
         let (remaining, value) = bind!(Self::parse_usi_slice(s));
         if remaining.is_empty() {
@@ -80,9 +85,11 @@ mod private {
 
     pub trait Sealed {}
 
+    impl Sealed for Color {}
     impl Sealed for Square {}
     impl Sealed for Piece {}
     impl Sealed for Move {}
+    impl Sealed for [Hand; 2] {}
     impl Sealed for PartialPosition {}
     #[cfg(feature = "alloc")]
     impl Sealed for shogi_core::Position {}

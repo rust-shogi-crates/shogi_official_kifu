@@ -4,7 +4,7 @@ use crate::{bind, try_with_progress, Error, FromUsi, Result};
 
 /// Drop moves are assumed to be black's move.
 /// In order to figure out whose move it is,
-/// one must count plies and check if it is even or odd.
+/// one must check which side is to play at the starting position and count how many moves are played.
 ///
 /// Examples:
 /// ```

@@ -10,4 +10,26 @@
 #include <stdlib.h>
 
 
+/**
+ * C interface of `<[Hand; 2]>::parse_usi_slice`.
+ * If parse error occurs, it returns -1.
+ * If parsing succeeds, it returns the number of read bytes.
+ *
+ * # Safety
+ * `hand` must be a valid pointer to Hand[2].
+ * `s` must be a nul-terminated C string.
+ */
+ptrdiff_t Hand_parse_usi_slice(Hand (*hand)[2], const uint8_t *s);
+
+/**
+ * C interface of `PartialPosition::parse_usi_slice`.
+ * If parse error occurs, it returns -1.
+ * If parsing succeeds, it returns the number of read bytes.
+ *
+ * # Safety
+ * `position` must be a valid pointer to a PartialPosition.
+ * `s` must be a nul-terminated C string.
+ */
+ptrdiff_t PartialPosition_parse_usi_slice(PartialPosition *position, const uint8_t *s);
+
 #endif /* shogi_usi_parser_bindings_h */

@@ -251,6 +251,11 @@ impl PartialPosition {
         self.side
     }
 
+    /// Sets which player is to move.
+    pub fn side_to_move_set(&mut self, side: Color) {
+        self.side = side;
+    }
+
     #[export_name = "PartialPosition_hand_of_a_player"]
     pub extern "C" fn hand_of_a_player(&self, color: Color) -> Hand {
         // Safety: color as usize is either 1 or 2
@@ -273,8 +278,20 @@ impl PartialPosition {
 
     /// Finds how many moves were made.
     #[export_name = "PartialPosition_ply"]
+    #[must_use]
     pub extern "C" fn ply(&self) -> u16 {
         self.ply
+    }
+
+    /// Sets how many moves are made. Returns whether this operation was successful.
+    /// This operation succeeds iff `ply != 0`.
+    #[must_use]
+    pub fn ply_set(&mut self, ply: u16) -> bool {
+        if ply == 0 {
+            return false;
+        }
+        self.ply = ply;
+        true
     }
 
     pub fn piece_at(&self, square: Square) -> Option<Piece> {
