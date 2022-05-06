@@ -155,9 +155,33 @@ impl PieceKind {
         }
     }
 
+    /// Converts a `u8` to `PieceKind` if possible.
+    ///
+    /// If `repr` is a valid representation of `PieceKind`, this function returns Some(piece_kind).
+    /// This condition is equivalent to `1 <= repr && repr <= 14`.
+    pub fn from_u8(repr: u8) -> Option<Self> {
+        if matches!(repr, 1..=14) {
+            // Safety: `repr` is in range `1..=14`.
+            Some(unsafe { Self::from_u8_unchecked(repr) })
+        } else {
+            None
+        }
+    }
+
+    /// C interface of `PieceKind::from_u8`.
+    #[no_mangle]
+    pub extern "C" fn PieceKind_from_u8(repr: u8) -> OptionPieceKind {
+        Self::from_u8(repr).into()
+    }
+
+    /// Converts a `u8` to `PieceKind` without checking.
+    ///
+    /// # Safety
     /// `repr` must be a valid representation of `PieceKind`.
     /// This condition is equivalent to `1 <= repr && repr <= 14`.
-    pub(crate) unsafe fn from_u8(repr: u8) -> Self {
+    #[export_name = "PieceKind_from_u8_unchecked"]
+    #[inline(always)]
+    pub unsafe extern "C" fn from_u8_unchecked(repr: u8) -> Self {
         core::mem::transmute(repr)
     }
 

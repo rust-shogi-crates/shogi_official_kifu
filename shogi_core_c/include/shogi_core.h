@@ -449,6 +449,20 @@ void PartialPosition_to_sfen_c(const struct PartialPosition *self, uint8_t *ptr)
 struct Bitboard PartialPosition_vacant_bitboard(const struct PartialPosition *self);
 
 /**
+ * C interface of `PieceKind::from_u8`.
+ */
+OptionPieceKind PieceKind_from_u8(uint8_t repr);
+
+/**
+ * Converts a `u8` to `PieceKind` without checking.
+ *
+ * # Safety
+ * `repr` must be a valid representation of `PieceKind`.
+ * This condition is equivalent to `1 <= repr && repr <= 14`.
+ */
+PieceKind PieceKind_from_u8_unchecked(uint8_t repr);
+
+/**
  * C interface of `PieceKind::promote`.
  */
 OptionPieceKind PieceKind_promote(PieceKind self);

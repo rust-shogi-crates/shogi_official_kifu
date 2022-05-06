@@ -47,7 +47,7 @@ impl Piece {
         let disc = data & 15;
         (
             // Safety: 1 <= disc <= 14
-            unsafe { PieceKind::from_u8(disc) },
+            unsafe { PieceKind::from_u8_unchecked(disc) },
             if data >= 16 {
                 Color::White
             } else {
