@@ -186,7 +186,7 @@ mod tests {
 
     #[test]
     fn normal_works_0() {
-        let pos = PartialPosition::from_usi("4k4/9/9/8P/9/9/9/4G4/4K4 b G 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 4k4/9/9/8P/9/9/9/4G4/4K4 b G 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(5, 8).unwrap(),
             to: Square::new(4, 8).unwrap(),
@@ -213,11 +213,10 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // TODO: impl FromUsi for Position
     fn normal_works_1() {
         use shogi_core::Position;
 
-        let pos = Position::from_usi("4k4/9/9/9/9/9/4g4/9/4KG3 w - 2 moves 5g5h").unwrap();
+        let pos = Position::from_usi("sfen 4k4/9/9/9/9/9/4g4/9/4KG3 w - 2 moves 5g5h").unwrap();
         let mv = Move::Normal {
             from: Square::new(4, 9).unwrap(),
             to: Square::new(5, 8).unwrap(),
@@ -226,17 +225,17 @@ mod tests {
         let result = display_single_move(pos.inner(), mv);
         assert_eq!(result, Some("▲同金".to_string()));
 
-        let pos = Position::from_usi("4k4/9/9/9/9/9/3gG4/9/4KG3 w - 2 moves 6g5h").unwrap();
+        let pos = Position::from_usi("sfen 4k4/9/9/9/9/9/3gG4/9/4KG3 w - 2 moves 6g5h").unwrap();
         let mv = Move::Normal {
-            from: Square::new(3, 8).unwrap(),
-            to: Square::new(4, 7).unwrap(),
+            from: Square::new(4, 9).unwrap(),
+            to: Square::new(5, 8).unwrap(),
             promote: false,
         };
         let result = display_single_move(pos.inner(), mv);
         assert_eq!(result, Some("▲同金上".to_string()));
         let mv = Move::Normal {
-            from: Square::new(4, 6).unwrap(),
-            to: Square::new(4, 7).unwrap(),
+            from: Square::new(5, 7).unwrap(),
+            to: Square::new(5, 8).unwrap(),
             promote: false,
         };
         let result = display_single_move(pos.inner(), mv);
@@ -246,7 +245,7 @@ mod tests {
     #[test]
     fn normal_works_2() {
         // Examples found in https://www.shogi.or.jp/faq/kihuhyouki.html.
-        let pos = PartialPosition::from_usi("4k4/2G6/G8/9/9/9/9/9/4K4 b - 1").unwrap(); // A
+        let pos = PartialPosition::from_usi("sfen 4k4/2G6/G8/9/9/9/9/9/4K4 b - 1").unwrap(); // A
 
         // A
         let mv = Move::Normal {
@@ -264,7 +263,7 @@ mod tests {
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８２金上".to_string()));
 
-        let pos = PartialPosition::from_usi("4k1G2/9/5G3/9/9/9/9/9/4K4 b - 1").unwrap(); // B
+        let pos = PartialPosition::from_usi("sfen 4k1G2/9/5G3/9/9/9/9/9/4K4 b - 1").unwrap(); // B
 
         // B
         let mv = Move::Normal {
@@ -282,7 +281,7 @@ mod tests {
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲３２金引".to_string()));
 
-        let pos = PartialPosition::from_usi("4k4/9/9/9/5G3/4G4/2S4S1/9/1S2KS3 b - 1").unwrap(); // C, D, E
+        let pos = PartialPosition::from_usi("sfen 4k4/9/9/9/5G3/4G4/2S4S1/9/1S2KS3 b - 1").unwrap(); // C, D, E
 
         // C
         let mv = Move::Normal {
@@ -334,7 +333,7 @@ mod tests {
     #[test]
     fn normal_works_3() {
         // Examples found in https://www.shogi.or.jp/faq/kihuhyouki.html.
-        let pos = PartialPosition::from_usi("4k4/G1G3G1G/9/9/3S1S3/9/9/9/4K4 b - 1").unwrap(); // A, B, C
+        let pos = PartialPosition::from_usi("sfen 4k4/G1G3G1G/9/9/3S1S3/9/9/9/4K4 b - 1").unwrap(); // A, B, C
 
         // A
         let mv = Move::Normal {
@@ -384,7 +383,7 @@ mod tests {
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲５６銀右".to_string()));
 
-        let pos = PartialPosition::from_usi("4k4/9/9/9/9/9/9/9/1GG1K1SS1 b - 1").unwrap(); // D, E
+        let pos = PartialPosition::from_usi("sfen 4k4/9/9/9/9/9/9/9/1GG1K1SS1 b - 1").unwrap(); // D, E
 
         // D
         let mv = Move::Normal {
@@ -423,7 +422,8 @@ mod tests {
     fn normal_works_4() {
         // Examples found in https://www.shogi.or.jp/faq/kihuhyouki.html.
         let pos =
-            PartialPosition::from_usi("4k4/9/3GGG3/9/9/9/1+P4S1S/+P8/+P+P+P1K1SS1 b - 1").unwrap(); // A, B, C
+            PartialPosition::from_usi("sfen 4k4/9/3GGG3/9/9/9/1+P4S1S/+P8/+P+P+P1K1SS1 b - 1")
+                .unwrap(); // A, B, C
 
         // A
         let mv = Move::Normal {
@@ -520,7 +520,7 @@ mod tests {
     fn normal_works_5() {
         // Examples found in https://www.shogi.or.jp/faq/kihuhyouki.html.
         // A
-        let pos = PartialPosition::from_usi("+R8/9/9/1+R7/9/9/9/9/4K1k2 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen +R8/9/9/1+R7/9/9/9/9/4K1k2 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(9, 1).unwrap(),
             to: Square::new(8, 2).unwrap(),
@@ -537,7 +537,7 @@ mod tests {
         assert_eq!(result, Some("▲８２竜上".to_string()));
 
         // B
-        let pos = PartialPosition::from_usi("9/4+R4/7+R1/9/9/9/9/9/2k1K4 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 9/4+R4/7+R1/9/9/9/9/9/2k1K4 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(2, 3).unwrap(),
             to: Square::new(4, 3).unwrap(),
@@ -554,7 +554,7 @@ mod tests {
         assert_eq!(result, Some("▲４３竜引".to_string()));
 
         // C
-        let pos = PartialPosition::from_usi("9/9/9/9/4+R3+R/9/9/9/2k1K4 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 9/9/9/9/4+R3+R/9/9/9/2k1K4 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(5, 5).unwrap(),
             to: Square::new(3, 5).unwrap(),
@@ -571,7 +571,7 @@ mod tests {
         assert_eq!(result, Some("▲３５竜右".to_string()));
 
         // D
-        let pos = PartialPosition::from_usi("9/9/9/9/9/9/9/9/+R+R2K1k2 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 9/9/9/9/9/9/9/9/+R+R2K1k2 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(9, 9).unwrap(),
             to: Square::new(8, 8).unwrap(),
@@ -588,7 +588,7 @@ mod tests {
         assert_eq!(result, Some("▲８８竜右".to_string()));
 
         // E
-        let pos = PartialPosition::from_usi("9/9/9/9/9/9/9/7+R1/2k1K3+R b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 9/9/9/9/9/9/9/7+R1/2k1K3+R b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(2, 8).unwrap(),
             to: Square::new(1, 7).unwrap(),
@@ -609,7 +609,7 @@ mod tests {
     fn normal_works_6() {
         // Examples found in https://www.shogi.or.jp/faq/kihuhyouki.html.
         // A
-        let pos = PartialPosition::from_usi("+B+B7/9/9/9/9/9/9/9/4K1k2 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen +B+B7/9/9/9/9/9/9/9/4K1k2 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(9, 1).unwrap(),
             to: Square::new(8, 2).unwrap(),
@@ -626,7 +626,7 @@ mod tests {
         assert_eq!(result, Some("▲８２馬右".to_string()));
 
         // B
-        let pos = PartialPosition::from_usi("9/9/3+B5/9/+B8/9/9/9/4K1k2 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 9/9/3+B5/9/+B8/9/9/9/4K1k2 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(9, 5).unwrap(),
             to: Square::new(8, 5).unwrap(),
@@ -643,7 +643,7 @@ mod tests {
         assert_eq!(result, Some("▲８５馬引".to_string()));
 
         // C
-        let pos = PartialPosition::from_usi("8+B/9/9/6+B2/9/9/9/9/4K1k2 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 8+B/9/9/6+B2/9/9/9/9/4K1k2 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(1, 1).unwrap(),
             to: Square::new(1, 2).unwrap(),
@@ -660,7 +660,7 @@ mod tests {
         assert_eq!(result, Some("▲１２馬上".to_string()));
 
         // D
-        let pos = PartialPosition::from_usi("9/9/9/9/9/9/9/9/+B3+BK1k1 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 9/9/9/9/9/9/9/9/+B3+BK1k1 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(9, 9).unwrap(),
             to: Square::new(7, 7).unwrap(),
@@ -677,7 +677,7 @@ mod tests {
         assert_eq!(result, Some("▲７７馬右".to_string()));
 
         // E
-        let pos = PartialPosition::from_usi("9/9/9/9/9/9/5+B3/8+B/2k1K4 b - 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 9/9/9/9/9/9/5+B3/8+B/2k1K4 b - 1").unwrap();
         let mv = Move::Normal {
             from: Square::new(4, 7).unwrap(),
             to: Square::new(2, 9).unwrap(),
@@ -696,7 +696,7 @@ mod tests {
 
     #[test]
     fn drop_works_0() {
-        let pos = PartialPosition::from_usi("4k4/9/9/9/9/9/9/4G4/4K4 b G 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 4k4/9/9/9/9/9/9/4G4/4K4 b G 1").unwrap();
         let mv = Move::Drop {
             to: Square::new(4, 8).unwrap(),
             piece: Piece::new(PieceKind::Gold, Color::Black),
@@ -707,7 +707,7 @@ mod tests {
 
     #[test]
     fn drop_works_1() {
-        let pos = PartialPosition::from_usi("4k4/9/9/9/9/9/9/9/4K4 b G 1").unwrap();
+        let pos = PartialPosition::from_usi("sfen 4k4/9/9/9/9/9/9/9/4K4 b G 1").unwrap();
         let mv = Move::Drop {
             to: Square::new(4, 8).unwrap(),
             piece: Piece::new(PieceKind::Gold, Color::Black),

@@ -56,7 +56,9 @@ pub trait LegalityChecker {
     #[cfg(feature = "alloc")]
     fn make_move(&self, position: &mut Position, mv: Move) {
         if self.is_legal(position, mv) {
-            position.make_move(mv);
+            // will always be Some(())
+            let result = position.make_move(mv);
+            debug_assert_eq!(result, Some(()));
         }
     }
 }

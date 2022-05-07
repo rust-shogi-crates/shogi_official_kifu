@@ -10,7 +10,7 @@ use crate::{Bitboard, Color, CompactMove, Hand, Move, Piece, PieceKind, Square, 
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Position {
-    startpos: PartialPosition,
+    initial: PartialPosition,
     inner: PartialPosition,
     moves: alloc::vec::Vec<Move>,
 }
@@ -18,8 +18,15 @@ pub struct Position {
 #[cfg(feature = "alloc")]
 impl Position {
     /// Returns the inner `PartialPosition`.
-    pub fn inner(&self) -> &PartialPosition {
+    #[export_name = "Position_inner"]
+    pub extern "C" fn inner(&self) -> &PartialPosition {
         &self.inner
+    }
+
+    /// Returns the initial position of [self], i.e., the position before any moves given to it.
+    #[export_name = "Position_initial_position"]
+    pub extern "C" fn initial_position(&self) -> &PartialPosition {
+        &self.initial
     }
 
     pub fn startpos() -> Self {
@@ -43,7 +50,7 @@ impl Position {
 
     pub fn arbitrary_position(p: PartialPosition) -> Self {
         Self {
-            startpos: p.clone(),
+            initial: p.clone(),
             inner: p,
             moves: alloc::vec::Vec::new(),
         }
@@ -146,6 +153,7 @@ impl Position {
     /// moves a piece to another square or drops a piece on a vacant square.
     ///
     /// If it returns None, it is guaranteed that self is not modified.
+    #[must_use]
     pub fn make_move(&mut self, mv: Move) -> Option<()> {
         self.inner.make_move(mv)?;
         self.moves.push(mv);
@@ -164,6 +172,8 @@ impl Position {
         let mv = mv.into();
         self.make_move(mv).is_some()
     }
+
+    // TODO: fn revert_move(&mut self) -> Option<Move>
 
     /// Returns the SFEN representation of the current position.
     pub fn to_sfen_owned(&self) -> alloc::string::String {
