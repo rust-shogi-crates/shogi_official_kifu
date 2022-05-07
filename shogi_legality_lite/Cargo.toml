@@ -17,7 +17,7 @@ crate-type = [
 ]
 
 [dependencies]
-shogi_core = { path = "../shogi_core", default-features = false }
+shogi_core = { git = "https://github.com/rust-shogi-crates/shogi_core", default-features = false }
 
 [profile.dev]
 panic = "abort"
