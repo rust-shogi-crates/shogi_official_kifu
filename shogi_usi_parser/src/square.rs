@@ -18,14 +18,17 @@ impl FromUsi for Square {
                 description: "A `Square` must have 2 letters in its representation",
             });
         }
-        if !matches!(s[0], b'1'..=b'9') {
+        // Safety: s.len() >= 2
+        let (&file, s) = unsafe { s.split_first().unwrap_unchecked() };
+        let (&rank, s) = unsafe { s.split_first().unwrap_unchecked() };
+        if !matches!(file, b'1'..=b'9') {
             return Err(Error::InvalidInput {
                 from: 0,
                 to: 2,
                 description: "`Square`: the first letter must be among 1, 2, ..., 9",
             });
         }
-        if !matches!(s[1], b'a'..=b'i') {
+        if !matches!(rank, b'a'..=b'i') {
             return Err(Error::InvalidInput {
                 from: 0,
                 to: 2,
@@ -33,8 +36,8 @@ impl FromUsi for Square {
             });
         }
         // Safety: file and rank are both in range `1..=9`
-        let result = unsafe { Square::new(s[0] - b'0', s[1] - b'a' + 1).unwrap_unchecked() };
-        Ok((&s[2..], result))
+        let result = unsafe { Square::new(file - b'0', rank - b'a' + 1).unwrap_unchecked() };
+        Ok((s, result))
     }
 }
 

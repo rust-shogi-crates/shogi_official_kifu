@@ -20,11 +20,11 @@ impl FromUsi for Move {
         if s.len() < 4 {
             return Err(Error::InvalidInput {
                 from: 0,
-                to: 0,
+                to: s.len(),
                 description: "A `Move` expected, but less than 4 bytes found",
             });
         }
-        if s[1] == b'*' {
+        if s.get(1).copied() == Some(b'*') {
             // A drop move: s[0] is an uppercase letter designating the `PieceKind`
             let (remaining, piece) = bind!(Piece::parse_usi_slice(&s[..1]));
             debug_assert!(remaining.is_empty());
@@ -43,9 +43,9 @@ impl FromUsi for Move {
         let (mut s, to) = try_with_progress!(Square::parse_usi_slice(s), 2);
         // promote?
         let mut promote = false;
-        if !s.is_empty() && s[0] == b'+' {
+        if let Some((&b'+', rest)) = s.split_first() {
             promote = true;
-            s = &s[1..];
+            s = rest;
         }
         Ok((s, Move::Normal { from, to, promote }))
     }

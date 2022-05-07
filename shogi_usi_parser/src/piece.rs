@@ -24,18 +24,22 @@ impl FromUsi for Piece {
                 description: "A `Piece` expected, but nothing found",
             });
         }
-        if s[0] == b'+' {
+        // Safety: s.len() >= 1
+        let (&first, rest) = unsafe { s.split_first().unwrap_unchecked() };
+        if first == b'+' {
             // a promoted piece
-            if s.len() == 1 {
+            let (&piece_byte, rest) = if let Some(x) = rest.split_first() {
+                x
+            } else {
                 return Err(Error::InvalidInput {
                     from: 0,
                     to: 1,
                     description: "A promoted `Piece` expected, but nothing found",
                 });
-            }
-            return if let Some(piece) = byte_to_piece(s[1]) {
+            };
+            return if let Some(piece) = byte_to_piece(piece_byte) {
                 if let Some(piece) = piece.promote() {
-                    Ok((&s[2..], piece))
+                    Ok((rest, piece))
                 } else {
                     Err(Error::InvalidInput {
                         from: 0,
@@ -51,8 +55,8 @@ impl FromUsi for Piece {
                 })
             };
         }
-        if let Some(piece) = byte_to_piece(s[0]) {
-            Ok((&s[1..], piece))
+        if let Some(piece) = byte_to_piece(first) {
+            Ok((rest, piece))
         } else {
             Err(Error::InvalidInput {
                 from: 0,
