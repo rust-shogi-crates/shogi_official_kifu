@@ -32,18 +32,8 @@ jobs:
       run: cargo --version
     - name: install nightly
       run: rustup toolchain install nightly
-    - name: install cbindgen (v${{ matrix.cbindgen-version }})
-      run: cargo install cbindgen --version ${{ matrix.cbindgen-version }}
     - name: install cargo-bloat (v${{ matrix.cargo-bloat-version }})
       run: cargo install cargo-bloat --version ${{ matrix.cargo-bloat-version }}
-    - name: Build
-      run: make sharedlib
-    - name: Build headers
-      run: make -B include
-    - name: Test
-      run: make c_tests
-    - name: Are headers up to date?
-      run: git diff --exit-code --stat
     - name: cargo bloat (display, release)
       run: cargo +nightly bloat --release --no-default-features --features alloc
     - name: 'TODO remove: inspect binary'
@@ -56,6 +46,8 @@ jobs:
       run: objdump --all-headers target/release/libshogi_usi_parser_c.so
     - name: 'TODO remove: inspect binary'
       run: objdump --full-contents --section=.data target/release/libshogi_usi_parser_c.so
+    - name: 'TODO remove: readelf'
+      run: readelf --all target/release/libshogi_usi_parser_c.so
     - name: cargo bloat (display, per-crate, release)
       run: cargo +nightly bloat --release --no-default-features --features alloc --crates
     - name: cargo bloat (testing, release)
