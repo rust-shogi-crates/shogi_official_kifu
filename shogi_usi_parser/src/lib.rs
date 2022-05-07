@@ -6,6 +6,7 @@ extern crate alloc;
 use shogi_core::{Color, Hand, Move, PartialPosition, Piece, Square};
 
 mod color;
+mod common;
 mod error;
 mod hand;
 mod mv;
