@@ -210,6 +210,17 @@ pub struct PartialPosition {
 }
 
 impl PartialPosition {
+    /// Returns an empty position.
+    pub fn empty() -> Self {
+        Self {
+            side: Color::Black,
+            ply: 1,
+            hands: [Default::default(); 2],
+            board: [None.into(); 81],
+            last_move: None.into(),
+        }
+    }
+
     /// Returns the starting position of shogi.
     pub fn startpos() -> Self {
         // TODO stop panicking

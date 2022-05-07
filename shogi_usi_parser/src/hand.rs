@@ -1,4 +1,3 @@
-use core::slice;
 use shogi_core::{Color, Hand, Piece};
 
 use crate::{Error, FromUsi, Result};
@@ -123,16 +122,5 @@ impl FromUsi for [Hand; 2] {
 /// `s` must be a nul-terminated C string.
 #[no_mangle]
 pub unsafe extern "C" fn Hand_parse_usi_slice(hand: &mut [Hand; 2], s: *const u8) -> isize {
-    let mut length = 0;
-    while *s.add(length) != 0 {
-        length += 1;
-    }
-    let slice = slice::from_raw_parts(s, length);
-    match <[Hand; 2]>::parse_usi_slice(slice) {
-        Ok((slice, resulting_hand)) => {
-            *hand = resulting_hand;
-            slice.as_ptr().offset_from(s)
-        }
-        Err(_) => -1,
-    }
+    crate::common::make_parse_usi_slice_c(hand, s)
 }

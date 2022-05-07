@@ -1,4 +1,3 @@
-use core::slice;
 use shogi_core::{Color, Hand, PartialPosition, Piece, Square};
 
 use crate::{try_with_progress, Error, FromUsi, Result};
@@ -23,7 +22,7 @@ impl FromUsi for shogi_core::Position {
     fn parse_usi_slice(s: &[u8]) -> Result<(&[u8], Self)> {
         let (s, partial) = crate::bind!(PartialPosition::parse_usi_slice(s));
         let orig = s;
-        // TODO handle moves
+        // handles moves
         let s = match parse_many_whitespaces(s) {
             Ok(s) => s,
             Err(_) => return Ok((s, shogi_core::Position::arbitrary_position(partial))),
@@ -70,14 +69,14 @@ impl FromUsi for PartialPosition {
     fn parse_usi_slice(mut s: &[u8]) -> Result<(&[u8], Self)> {
         use core::cmp::min;
 
-        let mut position = PartialPosition::startpos();
-
         if s.len() >= 8 {
             let (startpos, rest) = s.split_at(8); // Cannot panic
             if startpos == b"startpos" {
-                return Ok((rest, position));
+                return Ok((rest, PartialPosition::startpos()));
             }
         }
+
+        let mut position = PartialPosition::empty();
 
         let orig = s;
         if s.get(..4) != Some(b"sfen") {
@@ -208,8 +207,6 @@ fn parse_row(s: &[u8]) -> Result<(&[u8], [Option<Piece>; 9])> {
     Ok((this_row, result))
 }
 
-// TODO: refactor C interfaces, because they are a boilerplate
-
 /// C interface of `Position::parse_usi_slice`.
 /// If parse error occurs, it returns -1.
 /// If parsing succeeds, it returns the number of read bytes.
@@ -223,18 +220,7 @@ pub unsafe extern "C" fn Position_parse_usi_slice(
     position: &mut shogi_core::Position,
     s: *const u8,
 ) -> isize {
-    let mut length = 0;
-    while *s.add(length) != 0 {
-        length += 1;
-    }
-    let slice = slice::from_raw_parts(s, length);
-    match shogi_core::Position::parse_usi_slice(slice) {
-        Ok((slice, resulting_position)) => {
-            *position = resulting_position;
-            slice.as_ptr().offset_from(s)
-        }
-        Err(_) => -1,
-    }
+    crate::common::make_parse_usi_slice_c(position, s)
 }
 
 /// C interface of `PartialPosition::parse_usi_slice`.
@@ -249,16 +235,5 @@ pub unsafe extern "C" fn PartialPosition_parse_usi_slice(
     position: &mut PartialPosition,
     s: *const u8,
 ) -> isize {
-    let mut length = 0;
-    while *s.add(length) != 0 {
-        length += 1;
-    }
-    let slice = slice::from_raw_parts(s, length);
-    match PartialPosition::parse_usi_slice(slice) {
-        Ok((slice, resulting_position)) => {
-            *position = resulting_position;
-            slice.as_ptr().offset_from(s)
-        }
-        Err(_) => -1,
-    }
+    crate::common::make_parse_usi_slice_c(position, s)
 }
