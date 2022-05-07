@@ -51,7 +51,9 @@ jobs:
         ls -l target/release/libshogi_usi_parser_c.so
         objdump --section-headers target/release/libshogi_usi_parser_c.so
     - name: 'TODO remove: inspect binary'
-      run: objdump --full-contents --section=.bss target/release/libshogi_usi_parser_c.so
+      run: objdump --file-headers target/release/libshogi_usi_parser_c.so
+    - name: 'TODO remove: inspect binary'
+      run: objdump --full-contents --section=.data target/release/libshogi_usi_parser_c.so
     - name: cargo bloat (display, per-crate, release)
       run: cargo +nightly bloat --release --no-default-features --features alloc --crates
     - name: cargo bloat (testing, release)
