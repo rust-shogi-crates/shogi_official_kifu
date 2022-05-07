@@ -36,18 +36,12 @@ jobs:
       run: cargo install cargo-bloat --version ${{ matrix.cargo-bloat-version }}
     - name: cargo bloat (display, release)
       run: cargo +nightly bloat --release --no-default-features --features alloc
-    - name: 'TODO remove: inspect binary'
-      run: |
-        ls -l target/release/libshogi_usi_parser_c.so
-        objdump --section-headers target/release/libshogi_usi_parser_c.so
-    - name: 'TODO remove: inspect binary'
-      run: objdump --file-headers target/release/libshogi_usi_parser_c.so
-    - name: 'TODO remove: inspect binary'
-      run: objdump --all-headers target/release/libshogi_usi_parser_c.so
+    - name: 'TODO remove: size'
+      run: ls -l target/release/libshogi_usi_parser_c.so
     - name: 'TODO remove: readelf'
       run: readelf --section-headers target/release/libshogi_usi_parser_c.so
     - name: 'TODO remove: full-contents'
-      run: objdump --full-contents --section=.strtab target/release/libshogi_usi_parser_c.so
+      run: objdump --full-contents --section=.rodata target/release/libshogi_usi_parser_c.so
     - name: cargo bloat (display, per-crate, release)
       run: cargo +nightly bloat --release --no-default-features --features alloc --crates
     - name: cargo bloat (testing, release)
