@@ -28,7 +28,7 @@ impl FromUsi for shogi_core::Position {
             Ok(s) => s,
             Err(_) => return Ok((s, shogi_core::Position::arbitrary_position(partial))),
         };
-        if s.len() < 5 || &s[..5] != b"moves" {
+        if s.get(..5) != Some(b"moves") {
             return Ok((orig, shogi_core::Position::arbitrary_position(partial)));
         }
         let mut s = &s[5..];
@@ -72,12 +72,15 @@ impl FromUsi for PartialPosition {
 
         let mut position = PartialPosition::startpos();
 
-        if s.len() >= 8 && &s[..8] == b"startpos" {
-            return Ok((&s[8..], position));
+        if s.len() >= 8 {
+            let (startpos, rest) = s.split_at(8); // Cannot panic
+            if startpos == b"startpos" {
+                return Ok((rest, position));
+            }
         }
 
         let orig = s;
-        if s.len() < 4 || &s[..4] != b"sfen" {
+        if s.get(..4) != Some(b"sfen") {
             return Err(Error::InvalidInput {
                 from: 0,
                 to: min(4, s.len()),
@@ -99,36 +102,39 @@ impl FromUsi for PartialPosition {
             }
             s = slash;
             if i < 8 {
-                if s[0] != b'/' {
+                if s.get(0).copied() != Some(b'/') {
                     return Err(Error::InvalidInput {
                         from: orig.len() - slash.len(),
-                        to: orig.len() - slash.len() + 1,
+                        to: orig.len() - slash.len() + min(s.len(), 1),
                         description: "`/` was expected",
                     });
                 }
-                s = &s[1..];
+                // Safety: s.len() >= 1
+                s = unsafe { s.get_unchecked(1..) };
             }
         }
         // It is unclear whether multiple whitespaces between the components of SFEN are allowed.
         // Here we assume they aren't.
-        if s[0] != b' ' {
+        if s.get(0).copied() != Some(b' ') {
             return Err(Error::InvalidInput {
                 from: orig.len() - s.len(),
-                to: orig.len() - s.len() + 1,
+                to: orig.len() - s.len() + min(s.len(), 1),
                 description: "` ` (whitespace) was expected",
             });
         }
-        let s = &s[1..];
+        // Safety: s.len() >= 1
+        let s = unsafe { s.get_unchecked(1..) };
         let (s, side) = try_with_progress!(Color::parse_usi_slice(s), orig.len() - s.len());
         position.side_to_move_set(side);
-        if s[0] != b' ' {
+        if s.get(0).copied() != Some(b' ') {
             return Err(Error::InvalidInput {
                 from: orig.len() - s.len(),
                 to: orig.len() - s.len() + 1,
                 description: "` ` (whitespace) was expected",
             });
         }
-        let s = &s[1..];
+        // Safety: s.len() >= 1
+        let s = unsafe { s.get_unchecked(1..) };
         let (s, hand) = try_with_progress!(<[Hand; 2]>::parse_usi_slice(s), orig.len() - s.len());
         *position.hand_of_a_player_mut(Color::Black) = hand[0];
         *position.hand_of_a_player_mut(Color::White) = hand[1];
@@ -136,12 +142,15 @@ impl FromUsi for PartialPosition {
         if s.get(0).copied() != Some(b' ') {
             return Ok((s, position));
         }
-        let mut s = &s[1..];
+        // Safety: s.len() >= 1
+        let mut s = unsafe { s.get_unchecked(1..) };
         let mut count: u16 = 0;
-        while !s.is_empty() && matches!(s[0], b'0'..=b'9') {
-            let digit = (s[0] - b'0') as u16;
+        while matches!(s.get(0).copied(), Some(b'0'..=b'9')) {
+            // Safety: s.len() >= 1
+            let digit = (*unsafe { s.get_unchecked(0) } - b'0') as u16;
             count = count.saturating_mul(10).saturating_add(digit);
-            s = &s[1..];
+            // Safety: s.len() >= 1
+            s = unsafe { s.get_unchecked(1..) };
         }
         // We can ignore the result because even if setting move count fails, there is no problem.
         let _ = position.ply_set(count);
@@ -150,19 +159,20 @@ impl FromUsi for PartialPosition {
 }
 
 // Skips /\s+/.
-fn parse_many_whitespaces(mut s: &[u8]) -> Result<&[u8]> {
+fn parse_many_whitespaces(s: &[u8]) -> Result<&[u8]> {
     use core::cmp::min;
 
-    if s.get(0).copied() != Some(b' ') {
+    let mut s = if let Some((&b' ', s)) = s.split_first() {
+        s
+    } else {
         return Err(Error::InvalidInput {
-            from: 4,
-            to: 4 + min(1, s.len()),
-            description: "whitspace was expected",
+            from: 0,
+            to: min(1, s.len()),
+            description: "` ` (whitespace) was expected",
         });
-    }
-    s = &s[1..];
-    while s.get(0).copied() == Some(b' ') {
-        s = &s[1..];
+    };
+    while let Some((&b' ', rest)) = s.split_first() {
+        s = rest;
     }
     Ok(s)
 }
@@ -171,10 +181,13 @@ fn parse_row(s: &[u8]) -> Result<(&[u8], [Option<Piece>; 9])> {
     let mut this_row = s;
     let mut seen = 0; // how many squares did we find?
     let mut result = [None; 9];
-    while !this_row.is_empty() && seen <= 90 && this_row[0] != b'/' && this_row[0] != b' ' {
-        if matches!(this_row[0], b'1'..=b'9') {
-            seen += this_row[0] - b'0';
-            this_row = &this_row[1..];
+    while let Some((&first, next)) = this_row.split_first() {
+        if !(seen <= 90 && first != b'/' && first != b' ') {
+            break;
+        }
+        if matches!(first, b'1'..=b'9') {
+            seen += first - b'0';
+            this_row = next;
             continue;
         }
         let (next, piece) =

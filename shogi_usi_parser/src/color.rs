@@ -11,23 +11,24 @@ use crate::{Error, FromUsi, Result};
 /// ```
 impl FromUsi for Color {
     fn parse_usi_slice(s: &[u8]) -> Result<(&[u8], Self)> {
-        if s.is_empty() {
-            return Err(Error::InvalidInput {
+        if let Some((&first, s)) = s.split_first() {
+            if first == b'b' {
+                return Ok((s, Color::Black));
+            }
+            if first == b'w' {
+                return Ok((s, Color::White));
+            }
+            Err(Error::InvalidInput {
+                from: 0,
+                to: 1,
+                description: "A `Color` (`b` or `w`) expected, but invalid byte found",
+            })
+        } else {
+            Err(Error::InvalidInput {
                 from: 0,
                 to: 0,
                 description: "A `Color` expected, but nothing found",
-            });
+            })
         }
-        if s[0] == b'b' {
-            return Ok((&s[1..], Color::Black));
-        }
-        if s[0] == b'w' {
-            return Ok((&s[1..], Color::White));
-        }
-        Err(Error::InvalidInput {
-            from: 0,
-            to: 1,
-            description: "A `Color` (`b` or `w`) expected, but invalid byte found",
-        })
     }
 }
