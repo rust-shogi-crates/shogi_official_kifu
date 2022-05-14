@@ -5,7 +5,7 @@ version = 3
 [[package]]
 name = "shogi_core"
 version = "0.1.0"
-source = "git+https://github.com/rust-shogi-crates/shogi_core#004169285387f0710e0cf0580bb4da2d83682d2f"
+source = "git+https://github.com/rust-shogi-crates/shogi_core#c2ea3501cecfd2fbb816a0cbfa8168654b5022b4"
 
 [[package]]
 name = "shogi_usi_parser"
