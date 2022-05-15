@@ -15,7 +15,7 @@ crate-type = [
 ]
 
 [dependencies]
-shogi_core = { git = "https://github.com/rust-shogi-crates/shogi_core", default-features = false }
+shogi_core = { version = "0.1", default-features = false }
 shogi_legality_lite = { path = "./shogi_legality_lite", default-features = false, features = ["alloc"] }
 shogi_usi_parser = { path = "./shogi_usi_parser" }
 

@@ -5,7 +5,8 @@ version = 3
 [[package]]
 name = "shogi_core"
 version = "0.1.0"
-source = "git+https://github.com/rust-shogi-crates/shogi_core#c2ea3501cecfd2fbb816a0cbfa8168654b5022b4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7439bb95cc9cc291e2fb96a824a82cd9d3aa976c23f3497cacecbbe17c2e1d8"
 
 [[package]]
 name = "shogi_legality_lite"
