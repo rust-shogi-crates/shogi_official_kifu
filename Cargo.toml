@@ -17,7 +17,7 @@ crate-type = [
 [dependencies]
 shogi_core = { version = "0.1", default-features = false }
 shogi_legality_lite = { path = "./shogi_legality_lite", default-features = false, features = ["alloc"] }
-shogi_usi_parser = { path = "./shogi_usi_parser" }
+shogi_usi_parser = { version = "0.1", default-features = false, features = ["alloc"] }
 
 [profile.dev]
 debug = false
