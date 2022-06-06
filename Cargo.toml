@@ -6,7 +6,7 @@ edition = "2021"
 [features]
 default = ["kansuji", "std"]
 kansuji = []
-std = []
+std = ["shogi_core/std", "shogi_legality_lite/std", "shogi_usi_parser/std"]
 
 [lib]
 crate-type = [
@@ -15,8 +15,8 @@ crate-type = [
 ]
 
 [dependencies]
-shogi_core = { version = "0.1", default-features = false }
-shogi_legality_lite = { path = "./shogi_legality_lite", default-features = false, features = ["alloc"] }
+shogi_core = { version = "0.1", default-features = false, features = ["alloc"] }
+shogi_legality_lite = { version = "0.1", default-features = false, features = ["alloc"] }
 shogi_usi_parser = { version = "0.1", default-features = false, features = ["alloc"] }
 
 [profile.dev]
