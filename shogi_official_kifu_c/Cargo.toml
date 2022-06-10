@@ -1,0 +1,24 @@
+[package]
+name = "shogi_official_kifu_c"
+version = "0.0.0-unpublished"
+authors = ["Rust shogi crates developers"]
+edition = "2021"
+rust-version = "1.60"
+description = "C bindings of shogi_official_kifu"
+repository = "https://github.com/rust-shogi-crates/shogi_official_kifu/tree/main/shogi_official_kifu_c"
+license = "MIT"
+keywords = ["shogi", "engine"]
+categories = ["games", "game-engines", "game-development", "no-std"]
+publish = false
+
+[features]
+default = ["std"]
+std = ["shogi_official_kifu/std"]
+
+[lib]
+crate-type = [
+    "cdylib",
+]
+
+[dependencies]
+shogi_official_kifu = { path = "../shogi_official_kifu", default-features = false }

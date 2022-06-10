@@ -1,0 +1,19 @@
+[package]
+name = "shogi_official_kifu"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = ["kansuji", "std"]
+kansuji = []
+std = ["shogi_core/std", "shogi_legality_lite/std", "shogi_usi_parser/std"]
+
+[lib]
+crate-type = [
+    "rlib",
+]
+
+[dependencies]
+shogi_core = { version = "0.1", default-features = false, features = ["alloc"] }
+shogi_legality_lite = { version = "0.1", default-features = false, features = ["alloc"] }
+shogi_usi_parser = { version = "0.1", default-features = false, features = ["alloc"] }
