@@ -1,7 +1,7 @@
 use shogi_core::{Bitboard, Color, PartialPosition, PieceKind, Square};
 
+use core::cmp::Ordering;
 use core::fmt::Write;
-use std::cmp::Ordering;
 
 pub fn run<W: Write>(
     position: &PartialPosition,
@@ -9,7 +9,7 @@ pub fn run<W: Write>(
     to: Square,
     candidates: Bitboard,
     w: &mut W,
-) -> Result<Option<()>, std::fmt::Error> {
+) -> Result<Option<()>, core::fmt::Error> {
     if candidates.is_empty() {
         return Ok(None);
     }

@@ -49,7 +49,6 @@ fn panic(_panic: &core::panic::PanicInfo<'_>) -> ! {
 
 // alloc-related functions
 
-#[cfg(feature = "alloc")]
 #[alloc_error_handler]
 fn error_handler(_: core::alloc::Layout) -> ! {
     loop {}
@@ -57,7 +56,6 @@ fn error_handler(_: core::alloc::Layout) -> ! {
 
 // SimpleAllocator found in https://doc.rust-lang.org/core/alloc/trait.GlobalAlloc.html.
 // Modified so that ARENA_BSS is on .bss section and SimpleAllocator doesn't take much space.
-#[cfg(feature = "alloc")]
 mod simple_alloc {
     use core::alloc::{GlobalAlloc, Layout};
     use core::cell::UnsafeCell;

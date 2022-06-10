@@ -1,3 +1,9 @@
+#![cfg_attr(not(test), no_std)] // Forbids using std::*.
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(bench, feature(test))]
+
+extern crate alloc;
+
 use core::fmt::Write;
 use shogi_core::{
     Bitboard, Color, LegalityChecker, Move, PartialPosition, Piece, PieceKind, Square,
@@ -12,8 +18,9 @@ const SANYOU_SUJI: [char; 9] = ['１', '２', '３', '４', '５', '６', '７',
 const KANSUJI: [char; 9] = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
 /// https://www.shogi.or.jp/faq/kihuhyouki.html
-#[cfg(feature = "std")]
-pub fn display_single_move(position: &PartialPosition, mv: Move) -> Option<String> {
+pub fn display_single_move(position: &PartialPosition, mv: Move) -> Option<alloc::string::String> {
+    use crate::alloc::string::ToString;
+
     let mut ret = "".to_string();
     display_single_move_write(position, mv, &mut ret)
         .expect("fmt::Write for String cannot return an error")?;
@@ -21,8 +28,13 @@ pub fn display_single_move(position: &PartialPosition, mv: Move) -> Option<Strin
 }
 
 /// https://www.shogi.or.jp/faq/kihuhyouki.html
-#[cfg(all(feature = "std", feature = "kansuji"))]
-pub fn display_single_move_kansuji(position: &PartialPosition, mv: Move) -> Option<String> {
+#[cfg(feature = "kansuji")]
+pub fn display_single_move_kansuji(
+    position: &PartialPosition,
+    mv: Move,
+) -> Option<alloc::string::String> {
+    use crate::alloc::string::ToString;
+
     let mut ret = "".to_string();
     display_single_move_write_kansuji(position, mv, &mut ret)
         .expect("fmt::Write for String cannot return an error")?;
@@ -34,7 +46,7 @@ pub fn display_single_move_write<W: Write>(
     position: &PartialPosition,
     mv: Move,
     w: &mut W,
-) -> Result<Option<()>, std::fmt::Error> {
+) -> Result<Option<()>, core::fmt::Error> {
     if let Some(to) = write_side_and_find_to(position, mv, w)? {
         w.write_char(SANYOU_SUJI[to.file() as usize - 1])?;
         w.write_char(SANYOU_SUJI[to.rank() as usize - 1])?;
@@ -48,7 +60,7 @@ pub fn display_single_move_write_kansuji<W: Write>(
     position: &PartialPosition,
     mv: Move,
     w: &mut W,
-) -> Result<Option<()>, std::fmt::Error> {
+) -> Result<Option<()>, core::fmt::Error> {
     if let Some(to) = write_side_and_find_to(position, mv, w)? {
         w.write_char(SANYOU_SUJI[to.file() as usize - 1])?;
         w.write_char(KANSUJI[to.rank() as usize - 1])?;
@@ -62,7 +74,7 @@ fn write_side_and_find_to<W: Write>(
     position: &PartialPosition,
     mv: Move,
     w: &mut W,
-) -> Result<Option<Square>, std::fmt::Error> {
+) -> Result<Option<Square>, core::fmt::Error> {
     let side = position.side_to_move();
     let side_color = if side == Color::Black { '▲' } else { '△' };
     let to = match mv {
@@ -90,7 +102,7 @@ fn disambiguate<W: Write>(
     position: &PartialPosition,
     mv: Move,
     w: &mut W,
-) -> Result<Option<()>, std::fmt::Error> {
+) -> Result<Option<()>, core::fmt::Error> {
     let all_moves = LiteLegalityChecker.all_legal_moves_partial(position);
     match mv {
         Move::Normal { from, to, promote } => {

@@ -1,0 +1,68 @@
+name: C bindings
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: --deny warnings
+  SHARED_OBJECT: target/release/libshogi_official_kifu_c.so
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        cargo-bloat-version:
+          - '0.11.0'
+        cbindgen-version:
+          - '0.23.0'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: cargo version
+      run: cargo --version
+    - name: install nightly
+      run: rustup toolchain install nightly
+    - name: install cbindgen (v${{ matrix.cbindgen-version }})
+      run: cargo install cbindgen --version ${{ matrix.cbindgen-version }}
+    - name: install cargo-bloat (v${{ matrix.cargo-bloat-version }})
+      run: cargo install cargo-bloat --version ${{ matrix.cargo-bloat-version }}
+    - name: Build
+      run: make sharedlib
+    - name: Assert that headers are up to date
+      run: make check-include
+    - name: Assert that cdylib does not contain `panic_bounds_check`-related symbols
+      run: |
+        if nm ${SHARED_OBJECT} | grep --fixed-strings panic_bounds_check; [ $? -ne 1 ]; then
+          echo '`panic_bounds_check`-related symbols found in '${SHARED_OBJECT}
+          exit 1
+        fi
+    - name: Assert that cdylib does not contain the symbols `do_count_chars` and `pad_integral`
+      run: |
+        if nm ${SHARED_OBJECT} | grep --fixed-strings --regexp=do_count_chars --regexp=pad_integral; [ $? -ne 1 ]; then
+          echo '`do_count_chars` or `pad_integral` found in '${SHARED_OBJECT}
+          exit 1
+        fi
+    - name: Assert that cdylib does not contain the symbol `write_char`
+      run: |
+        if nm ${SHARED_OBJECT} | grep --fixed-strings write_char; [ $? -ne 1 ]; then
+          echo '`write_char` found in '${SHARED_OBJECT}
+          exit 1
+        fi
+    - name: '`readelf` (section headers)'
+      run: readelf --section-headers ${SHARED_OBJECT}
+    - name: Test
+      run: make c_tests
+    - name: cargo bloat (display, release)
+      run: cargo +nightly bloat --release --no-default-features
+    - name: cargo bloat (display, per-crate, release)
+      run: cargo +nightly bloat --release --no-default-features --crates
+    - name: cargo bloat (testing, release)
+      # Size <= 60KiB?
+      run: cargo +nightly bloat --release --no-default-features --message-format json | jq --exit-status '."file-size" <= 61440'
