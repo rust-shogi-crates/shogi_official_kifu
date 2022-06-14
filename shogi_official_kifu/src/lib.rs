@@ -19,9 +19,7 @@ const KANSUJI: [char; 9] = ['一', '二', '三', '四', '五', '六', '七', '�
 
 /// https://www.shogi.or.jp/faq/kihuhyouki.html
 pub fn display_single_move(position: &PartialPosition, mv: Move) -> Option<alloc::string::String> {
-    use crate::alloc::string::ToString;
-
-    let mut ret = "".to_string();
+    let mut ret = alloc::string::String::new();
     display_single_move_write(position, mv, &mut ret)
         .expect("fmt::Write for String cannot return an error")?;
     Some(ret)
@@ -33,9 +31,7 @@ pub fn display_single_move_kansuji(
     position: &PartialPosition,
     mv: Move,
 ) -> Option<alloc::string::String> {
-    use crate::alloc::string::ToString;
-
-    let mut ret = "".to_string();
+    let mut ret = alloc::string::String::new();
     display_single_move_write_kansuji(position, mv, &mut ret)
         .expect("fmt::Write for String cannot return an error")?;
     Some(ret)
