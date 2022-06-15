@@ -60,9 +60,9 @@ jobs:
     - name: Test
       run: make c_tests
     - name: cargo bloat (display, release)
-      run: cargo +nightly bloat --release --no-default-features
+      run: cargo +nightly bloat --release --no-default-features --features kansuji
     - name: cargo bloat (display, per-crate, release)
-      run: cargo +nightly bloat --release --no-default-features --crates
+      run: cargo +nightly bloat --release --no-default-features --features kansuji --crates
     - name: cargo bloat (testing, release)
       # Size <= 60KiB?
-      run: cargo +nightly bloat --release --no-default-features --message-format json | jq --exit-status '."file-size" <= 61440'
+      run: cargo +nightly bloat --release --no-default-features --features kansuji --message-format json | jq --exit-status '."file-size" <= 61440'

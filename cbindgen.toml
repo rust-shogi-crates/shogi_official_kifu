@@ -33,6 +33,7 @@ usize_is_size_t = true
 
 
 [defines]
+"feature = kansuji" = "DEFINE_KANSUJI"
 "feature = std" = "DEFINE_STD"
 
 [export]

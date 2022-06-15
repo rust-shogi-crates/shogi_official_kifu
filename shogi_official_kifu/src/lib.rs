@@ -6,7 +6,7 @@ extern crate alloc;
 
 use core::fmt::Write;
 use shogi_core::{
-    Bitboard, Color, LegalityChecker, Move, PartialPosition, Piece, PieceKind, Square,
+    Bitboard, Color, CompactMove, LegalityChecker, Move, PartialPosition, Piece, PieceKind, Square,
 };
 use shogi_legality_lite::LiteLegalityChecker;
 
@@ -35,6 +35,50 @@ pub fn display_single_move_kansuji(
     display_single_move_write_kansuji(position, mv, &mut ret)
         .expect("fmt::Write for String cannot return an error")?;
     Some(ret)
+}
+
+struct Bridge(*mut u8);
+impl Write for Bridge {
+    #[inline(always)]
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        fn inner(this: &mut Bridge, s: &str) {
+            let slice = s.as_bytes();
+            unsafe {
+                for (i, &byte) in slice.iter().enumerate() {
+                    core::ptr::write(this.0.add(i), byte);
+                }
+                this.0 = this.0.add(slice.len());
+            }
+        }
+        inner(self, s);
+        Ok(())
+    }
+}
+
+/// https://www.shogi.or.jp/faq/kihuhyouki.html
+#[no_mangle]
+pub unsafe extern "C" fn display_single_compactmove(
+    position: &PartialPosition,
+    mv: CompactMove,
+    ptr: *mut u8,
+) -> bool {
+    let mut sink = Bridge(ptr);
+    let result = display_single_move_write(position, mv.into(), &mut sink).unwrap_unchecked();
+    result.is_some()
+}
+
+/// https://www.shogi.or.jp/faq/kihuhyouki.html
+#[no_mangle]
+#[cfg(feature = "kansuji")]
+pub unsafe extern "C" fn display_single_compactmove_kansuji(
+    position: &PartialPosition,
+    mv: CompactMove,
+    ptr: *mut u8,
+) -> bool {
+    let mut sink = Bridge(ptr);
+    let result =
+        display_single_move_write_kansuji(position, mv.into(), &mut sink).unwrap_unchecked();
+    result.is_some()
 }
 
 /// https://www.shogi.or.jp/faq/kihuhyouki.html
@@ -183,6 +227,7 @@ fn piece_kind_to_kanji(piece_kind: PieceKind) -> &'static str {
     }
 }
 
+#[inline(always)]
 fn is_promotable_piece(piece_kind: PieceKind) -> bool {
     piece_kind.promote().is_some()
 }
