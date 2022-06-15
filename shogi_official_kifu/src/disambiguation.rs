@@ -107,14 +107,16 @@ fn run_file(
         return Some((candidates, '壱'));
     }
     let mut candidates_cp = candidates;
-    // TODO stop panicking
-    let cand1 = candidates_cp.pop().unwrap();
-    let cand2 = candidates_cp.pop().unwrap();
+    // Safety: candidates_cp contains exactly two elements
+    let cand1 = unsafe { candidates_cp.pop().unwrap_unchecked() };
+    let cand2 = unsafe { candidates_cp.pop().unwrap_unchecked() };
     if cand1.file() == cand2.file() {
         return Some((candidates, '？'));
     }
     let mut cand = [cand1, cand2];
-    cand.sort_unstable_by_key(|&c| c.file() as i8 * if side == Color::Black { 1 } else { -1 });
+    sort_2_by_key(&mut cand, |c| {
+        c.file() as i8 * if side == Color::Black { 1 } else { -1 }
+    });
     let relative_file = if from == cand[0] {
         '右'
     } else if from == cand[1] {
@@ -131,4 +133,12 @@ fn is_gold_like(piece_kind: PieceKind) -> bool {
         piece_kind,
         Gold | Silver | ProPawn | ProLance | ProKnight | ProSilver,
     )
+}
+
+fn sort_2_by_key<F: Fn(Square) -> i8>(a: &mut [Square; 2], f: F) {
+    let v0 = f(a[0]);
+    let v1 = f(a[1]);
+    if v0 > v1 {
+        a.swap(0, 1);
+    }
 }

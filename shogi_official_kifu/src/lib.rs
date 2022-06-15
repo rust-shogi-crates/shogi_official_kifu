@@ -88,8 +88,8 @@ pub fn display_single_move_write<W: Write>(
     w: &mut W,
 ) -> Result<Option<()>, core::fmt::Error> {
     if let Some(to) = write_side_and_find_to(position, mv, w)? {
-        w.write_char(SANYOU_SUJI[to.file() as usize - 1])?;
-        w.write_char(SANYOU_SUJI[to.rank() as usize - 1])?;
+        w.write_char(*unsafe { SANYOU_SUJI.get_unchecked(to.file() as usize - 1) })?;
+        w.write_char(*unsafe { SANYOU_SUJI.get_unchecked(to.rank() as usize - 1) })?;
     }
     disambiguate(position, mv, w)
 }
@@ -102,8 +102,8 @@ pub fn display_single_move_write_kansuji<W: Write>(
     w: &mut W,
 ) -> Result<Option<()>, core::fmt::Error> {
     if let Some(to) = write_side_and_find_to(position, mv, w)? {
-        w.write_char(SANYOU_SUJI[to.file() as usize - 1])?;
-        w.write_char(KANSUJI[to.rank() as usize - 1])?;
+        w.write_char(*unsafe { SANYOU_SUJI.get_unchecked(to.file() as usize - 1) })?;
+        w.write_char(*unsafe { KANSUJI.get_unchecked(to.rank() as usize - 1) })?;
     }
     disambiguate(position, mv, w)
 }

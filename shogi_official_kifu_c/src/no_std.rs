@@ -40,6 +40,15 @@ pub unsafe extern "C" fn __bzero(s: *mut u8, n: usize) {
     }
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn memmove(dest: *mut u8, src: *const u8, n: usize) -> *mut u8 {
+    for i in 0..n {
+        let value = core::ptr::read(src.add(i));
+        core::ptr::write(dest.add(i), value);
+    }
+    dest
+}
+
 // panic-related functions
 
 #[panic_handler]
