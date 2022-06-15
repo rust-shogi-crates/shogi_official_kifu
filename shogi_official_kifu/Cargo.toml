@@ -3,6 +3,10 @@ name = "shogi_official_kifu"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [features]
 default = ["kansuji", "std"]
 kansuji = []

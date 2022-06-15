@@ -27,6 +27,7 @@ pub fn display_single_move(position: &PartialPosition, mv: Move) -> Option<alloc
 
 /// https://www.shogi.or.jp/faq/kihuhyouki.html
 #[cfg(feature = "kansuji")]
+#[cfg_attr(docsrs, doc(cfg(feature = "kansuji")))]
 pub fn display_single_move_kansuji(
     position: &PartialPosition,
     mv: Move,
@@ -76,6 +77,7 @@ pub unsafe extern "C" fn display_single_compactmove(
 /// `ptr` must have enough space for the result.
 #[no_mangle]
 #[cfg(feature = "kansuji")]
+#[cfg_attr(docsrs, doc(cfg(feature = "kansuji")))]
 pub unsafe extern "C" fn display_single_compactmove_kansuji(
     position: &PartialPosition,
     mv: CompactMove,
@@ -102,6 +104,7 @@ pub fn display_single_move_write<W: Write>(
 
 /// Traditional move notation, usually found in books, magazines, articles.
 #[cfg(feature = "kansuji")]
+#[cfg_attr(docsrs, doc(cfg(feature = "kansuji")))]
 pub fn display_single_move_write_kansuji<W: Write>(
     position: &PartialPosition,
     mv: Move,
