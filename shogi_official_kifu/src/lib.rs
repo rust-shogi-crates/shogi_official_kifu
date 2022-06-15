@@ -56,6 +56,9 @@ impl Write for Bridge {
 }
 
 /// https://www.shogi.or.jp/faq/kihuhyouki.html
+///
+/// # Safety
+/// `ptr` must have enough space for the result.
 #[no_mangle]
 pub unsafe extern "C" fn display_single_compactmove(
     position: &PartialPosition,
@@ -68,6 +71,9 @@ pub unsafe extern "C" fn display_single_compactmove(
 }
 
 /// https://www.shogi.or.jp/faq/kihuhyouki.html
+///
+/// # Safety
+/// `ptr` must have enough space for the result.
 #[no_mangle]
 #[cfg(feature = "kansuji")]
 pub unsafe extern "C" fn display_single_compactmove_kansuji(

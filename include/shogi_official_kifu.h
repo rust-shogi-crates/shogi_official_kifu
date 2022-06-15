@@ -143,6 +143,9 @@ typedef uint16_t CompactMove;
 
 /**
  * https://www.shogi.or.jp/faq/kihuhyouki.html
+ *
+ * # Safety
+ * `ptr` must have enough space for the result.
  */
 bool display_single_compactmove(const struct PartialPosition *position,
                                 CompactMove mv,
@@ -151,6 +154,9 @@ bool display_single_compactmove(const struct PartialPosition *position,
 #if defined(DEFINE_KANSUJI)
 /**
  * https://www.shogi.or.jp/faq/kihuhyouki.html
+ *
+ * # Safety
+ * `ptr` must have enough space for the result.
  */
 bool display_single_compactmove_kansuji(const struct PartialPosition *position,
                                         CompactMove mv,
