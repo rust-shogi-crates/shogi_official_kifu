@@ -142,10 +142,12 @@ typedef struct PartialPosition {
 typedef uint16_t CompactMove;
 
 /**
- * https://www.shogi.or.jp/faq/kihuhyouki.html
+ * Finds the string representation of a [`Move`] and write it to a [`u8`] pointer.
  *
  * # Safety
  * `ptr` must have enough space for the result.
+ *
+ * Ref: <https://www.shogi.or.jp/faq/kihuhyouki.html>
  */
 bool display_single_compactmove(const struct PartialPosition *position,
                                 CompactMove mv,
@@ -153,10 +155,12 @@ bool display_single_compactmove(const struct PartialPosition *position,
 
 #if defined(DEFINE_KANSUJI)
 /**
- * https://www.shogi.or.jp/faq/kihuhyouki.html
+ * Finds the string representation of a [`Move`] and write it to a [`u8`] pointer.
  *
  * # Safety
  * `ptr` must have enough space for the result.
+ *
+ * Ref: <https://www.shogi.or.jp/faq/kihuhyouki.html>
  */
 bool display_single_compactmove_kansuji(const struct PartialPosition *position,
                                         CompactMove mv,

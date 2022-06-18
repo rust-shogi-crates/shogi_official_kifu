@@ -17,7 +17,23 @@ const SANYOU_SUJI: [char; 9] = ['１', '２', '３', '４', '５', '６', '７',
 #[cfg(feature = "kansuji")]
 const KANSUJI: [char; 9] = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
-/// https://www.shogi.or.jp/faq/kihuhyouki.html
+/// Finds the string representation of a [`Move`].
+///
+/// Examples:
+/// ```
+/// # use shogi_core::{Move, PartialPosition, Square};
+/// # use shogi_usi_parser::FromUsi;
+/// # use shogi_official_kifu::display_single_move;
+/// let pos = PartialPosition::from_usi("sfen 4k4/9/9/8P/9/9/9/4G4/4K4 b G 1").unwrap();
+/// let mv = Move::Normal {
+///     from: Square::SQ_5H,
+///     to: Square::SQ_4H,
+///     promote: false,
+/// };
+/// let result = display_single_move(&pos, mv);
+/// assert_eq!(result, Some("▲４８金".to_string()));
+/// ```
+/// Ref: <https://www.shogi.or.jp/faq/kihuhyouki.html>
 pub fn display_single_move(position: &PartialPosition, mv: Move) -> Option<alloc::string::String> {
     let mut ret = alloc::string::String::new();
     display_single_move_write(position, mv, &mut ret)
@@ -25,7 +41,23 @@ pub fn display_single_move(position: &PartialPosition, mv: Move) -> Option<alloc
     Some(ret)
 }
 
-/// https://www.shogi.or.jp/faq/kihuhyouki.html
+/// Finds the string representation of a [`Move`].
+///
+/// Examples:
+/// ```
+/// # use shogi_core::{Move, PartialPosition, Square};
+/// # use shogi_usi_parser::FromUsi;
+/// # use shogi_official_kifu::display_single_move_kansuji;
+/// let pos = PartialPosition::from_usi("sfen 4k4/9/9/8P/9/9/9/4G4/4K4 b G 1").unwrap();
+/// let mv = Move::Normal {
+///     from: Square::SQ_5H,
+///     to: Square::SQ_4H,
+///     promote: false,
+/// };
+/// let result = display_single_move_kansuji(&pos, mv);
+/// assert_eq!(result, Some("▲４八金".to_string()));
+/// ```
+/// Ref: <https://www.shogi.or.jp/faq/kihuhyouki.html>
 #[cfg(feature = "kansuji")]
 #[cfg_attr(docsrs, doc(cfg(feature = "kansuji")))]
 pub fn display_single_move_kansuji(
@@ -56,10 +88,12 @@ impl Write for Bridge {
     }
 }
 
-/// https://www.shogi.or.jp/faq/kihuhyouki.html
+/// Finds the string representation of a [`Move`] and write it to a [`u8`] pointer.
 ///
 /// # Safety
 /// `ptr` must have enough space for the result.
+///
+/// Ref: <https://www.shogi.or.jp/faq/kihuhyouki.html>
 #[no_mangle]
 pub unsafe extern "C" fn display_single_compactmove(
     position: &PartialPosition,
@@ -71,10 +105,12 @@ pub unsafe extern "C" fn display_single_compactmove(
     result.is_some()
 }
 
-/// https://www.shogi.or.jp/faq/kihuhyouki.html
+/// Finds the string representation of a [`Move`] and write it to a [`u8`] pointer.
 ///
 /// # Safety
 /// `ptr` must have enough space for the result.
+///
+/// Ref: <https://www.shogi.or.jp/faq/kihuhyouki.html>
 #[no_mangle]
 #[cfg(feature = "kansuji")]
 #[cfg_attr(docsrs, doc(cfg(feature = "kansuji")))]
@@ -89,7 +125,9 @@ pub unsafe extern "C" fn display_single_compactmove_kansuji(
     result.is_some()
 }
 
-/// https://www.shogi.or.jp/faq/kihuhyouki.html
+/// Finds the string representation of a [`Move`] and write it to a [`Write`].
+///
+/// Ref: <https://www.shogi.or.jp/faq/kihuhyouki.html>
 pub fn display_single_move_write<W: Write>(
     position: &PartialPosition,
     mv: Move,
@@ -102,7 +140,10 @@ pub fn display_single_move_write<W: Write>(
     disambiguate(position, mv, w)
 }
 
+/// Finds the string representation of a [`Move`] and write it to a [`Write`].
+///
 /// Traditional move notation, usually found in books, magazines, articles.
+/// Ref: <https://www.shogi.or.jp/faq/kihuhyouki.html>
 #[cfg(feature = "kansuji")]
 #[cfg_attr(docsrs, doc(cfg(feature = "kansuji")))]
 pub fn display_single_move_write_kansuji<W: Write>(
@@ -250,24 +291,24 @@ mod tests {
     fn normal_works_0() {
         let pos = PartialPosition::from_usi("sfen 4k4/9/9/8P/9/9/9/4G4/4K4 b G 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(5, 8).unwrap(),
-            to: Square::new(4, 8).unwrap(),
+            from: Square::SQ_5H,
+            to: Square::SQ_4H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲４８金".to_string()));
 
         let mv = Move::Normal {
-            from: Square::new(1, 4).unwrap(),
-            to: Square::new(1, 3).unwrap(),
+            from: Square::SQ_1D,
+            to: Square::SQ_1C,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲１３歩不成".to_string()));
 
         let mv = Move::Normal {
-            from: Square::new(1, 4).unwrap(),
-            to: Square::new(1, 3).unwrap(),
+            from: Square::SQ_1D,
+            to: Square::SQ_1C,
             promote: true,
         };
         let result = display_single_move(&pos, mv);
@@ -280,8 +321,8 @@ mod tests {
 
         let pos = Position::from_usi("sfen 4k4/9/9/9/9/9/4g4/9/4KG3 w - 2 moves 5g5h").unwrap();
         let mv = Move::Normal {
-            from: Square::new(4, 9).unwrap(),
-            to: Square::new(5, 8).unwrap(),
+            from: Square::SQ_4I,
+            to: Square::SQ_5H,
             promote: false,
         };
         let result = display_single_move(pos.inner(), mv);
@@ -289,15 +330,15 @@ mod tests {
 
         let pos = Position::from_usi("sfen 4k4/9/9/9/9/9/3gG4/9/4KG3 w - 2 moves 6g5h").unwrap();
         let mv = Move::Normal {
-            from: Square::new(4, 9).unwrap(),
-            to: Square::new(5, 8).unwrap(),
+            from: Square::SQ_4I,
+            to: Square::SQ_5H,
             promote: false,
         };
         let result = display_single_move(pos.inner(), mv);
         assert_eq!(result, Some("▲同金上".to_string()));
         let mv = Move::Normal {
-            from: Square::new(5, 7).unwrap(),
-            to: Square::new(5, 8).unwrap(),
+            from: Square::SQ_5G,
+            to: Square::SQ_5H,
             promote: false,
         };
         let result = display_single_move(pos.inner(), mv);
@@ -311,15 +352,15 @@ mod tests {
 
         // A
         let mv = Move::Normal {
-            from: Square::new(7, 2).unwrap(),
-            to: Square::new(8, 2).unwrap(),
+            from: Square::SQ_7B,
+            to: Square::SQ_8B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８２金寄".to_string()));
         let mv = Move::Normal {
-            from: Square::new(9, 3).unwrap(),
-            to: Square::new(8, 2).unwrap(),
+            from: Square::SQ_9C,
+            to: Square::SQ_8B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -329,15 +370,15 @@ mod tests {
 
         // B
         let mv = Move::Normal {
-            from: Square::new(4, 3).unwrap(),
-            to: Square::new(3, 2).unwrap(),
+            from: Square::SQ_4C,
+            to: Square::SQ_3B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲３２金上".to_string()));
         let mv = Move::Normal {
-            from: Square::new(3, 1).unwrap(),
-            to: Square::new(3, 2).unwrap(),
+            from: Square::SQ_3A,
+            to: Square::SQ_3B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -347,45 +388,45 @@ mod tests {
 
         // C
         let mv = Move::Normal {
-            from: Square::new(5, 6).unwrap(),
-            to: Square::new(5, 5).unwrap(),
+            from: Square::SQ_5F,
+            to: Square::SQ_5E,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲５５金上".to_string()));
         let mv = Move::Normal {
-            from: Square::new(4, 5).unwrap(),
-            to: Square::new(5, 5).unwrap(),
+            from: Square::SQ_4E,
+            to: Square::SQ_5E,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲５５金寄".to_string()));
         let mv = Move::Normal {
-            from: Square::new(8, 9).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_8I,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         // D
         assert_eq!(result, Some("▲８８銀上".to_string()));
         let mv = Move::Normal {
-            from: Square::new(7, 7).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_7G,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８８銀引".to_string()));
         let mv = Move::Normal {
-            from: Square::new(4, 9).unwrap(),
-            to: Square::new(3, 8).unwrap(),
+            from: Square::SQ_4I,
+            to: Square::SQ_3H,
             promote: false,
         };
         // E
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲３８銀上".to_string()));
         let mv = Move::Normal {
-            from: Square::new(2, 7).unwrap(),
-            to: Square::new(3, 8).unwrap(),
+            from: Square::SQ_2G,
+            to: Square::SQ_3H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -399,15 +440,15 @@ mod tests {
 
         // A
         let mv = Move::Normal {
-            from: Square::new(9, 2).unwrap(),
-            to: Square::new(8, 1).unwrap(),
+            from: Square::SQ_9B,
+            to: Square::SQ_8A,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８１金左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(7, 2).unwrap(),
-            to: Square::new(8, 1).unwrap(),
+            from: Square::SQ_7B,
+            to: Square::SQ_8A,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -415,15 +456,15 @@ mod tests {
 
         // B
         let mv = Move::Normal {
-            from: Square::new(3, 2).unwrap(),
-            to: Square::new(2, 2).unwrap(),
+            from: Square::SQ_3B,
+            to: Square::SQ_2B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲２２金左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(1, 2).unwrap(),
-            to: Square::new(2, 2).unwrap(),
+            from: Square::SQ_1B,
+            to: Square::SQ_2B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -431,15 +472,15 @@ mod tests {
 
         // C
         let mv = Move::Normal {
-            from: Square::new(6, 5).unwrap(),
-            to: Square::new(5, 6).unwrap(),
+            from: Square::SQ_6E,
+            to: Square::SQ_5F,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲５６銀左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(4, 5).unwrap(),
-            to: Square::new(5, 6).unwrap(),
+            from: Square::SQ_4E,
+            to: Square::SQ_5F,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -449,15 +490,15 @@ mod tests {
 
         // D
         let mv = Move::Normal {
-            from: Square::new(8, 9).unwrap(),
-            to: Square::new(7, 8).unwrap(),
+            from: Square::SQ_8I,
+            to: Square::SQ_7H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲７８金左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(7, 9).unwrap(),
-            to: Square::new(7, 8).unwrap(),
+            from: Square::SQ_7I,
+            to: Square::SQ_7H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -465,15 +506,15 @@ mod tests {
 
         // E
         let mv = Move::Normal {
-            from: Square::new(3, 9).unwrap(),
-            to: Square::new(3, 8).unwrap(),
+            from: Square::SQ_3I,
+            to: Square::SQ_3H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲３８銀直".to_string()));
         let mv = Move::Normal {
-            from: Square::new(2, 9).unwrap(),
-            to: Square::new(3, 8).unwrap(),
+            from: Square::SQ_2I,
+            to: Square::SQ_3H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -489,22 +530,22 @@ mod tests {
 
         // A
         let mv = Move::Normal {
-            from: Square::new(6, 3).unwrap(),
-            to: Square::new(5, 2).unwrap(),
+            from: Square::SQ_6C,
+            to: Square::SQ_5B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲５２金左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(5, 3).unwrap(),
-            to: Square::new(5, 2).unwrap(),
+            from: Square::SQ_5C,
+            to: Square::SQ_5B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲５２金直".to_string()));
         let mv = Move::Normal {
-            from: Square::new(4, 3).unwrap(),
-            to: Square::new(5, 2).unwrap(),
+            from: Square::SQ_4C,
+            to: Square::SQ_5B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -512,36 +553,36 @@ mod tests {
 
         // B
         let mv = Move::Normal {
-            from: Square::new(7, 9).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_7I,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８８と右".to_string()));
         let mv = Move::Normal {
-            from: Square::new(8, 9).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_8I,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８８と直".to_string()));
         let mv = Move::Normal {
-            from: Square::new(9, 9).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_9I,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８８と左上".to_string()));
         let mv = Move::Normal {
-            from: Square::new(9, 8).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_9H,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８８と寄".to_string()));
         let mv = Move::Normal {
-            from: Square::new(8, 7).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_8G,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -549,29 +590,29 @@ mod tests {
 
         // C
         let mv = Move::Normal {
-            from: Square::new(2, 9).unwrap(),
-            to: Square::new(2, 8).unwrap(),
+            from: Square::SQ_2I,
+            to: Square::SQ_2H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲２８銀直".to_string()));
         let mv = Move::Normal {
-            from: Square::new(1, 7).unwrap(),
-            to: Square::new(2, 8).unwrap(),
+            from: Square::SQ_1G,
+            to: Square::SQ_2H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲２８銀右".to_string()));
         let mv = Move::Normal {
-            from: Square::new(3, 9).unwrap(),
-            to: Square::new(2, 8).unwrap(),
+            from: Square::SQ_3I,
+            to: Square::SQ_2H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲２８銀左上".to_string()));
         let mv = Move::Normal {
-            from: Square::new(3, 7).unwrap(),
-            to: Square::new(2, 8).unwrap(),
+            from: Square::SQ_3G,
+            to: Square::SQ_2H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -584,15 +625,15 @@ mod tests {
         // A
         let pos = PartialPosition::from_usi("sfen +R8/9/9/1+R7/9/9/9/9/4K1k2 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(9, 1).unwrap(),
-            to: Square::new(8, 2).unwrap(),
+            from: Square::SQ_9A,
+            to: Square::SQ_8B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８２竜引".to_string()));
         let mv = Move::Normal {
-            from: Square::new(8, 4).unwrap(),
-            to: Square::new(8, 2).unwrap(),
+            from: Square::SQ_8D,
+            to: Square::SQ_8B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -601,15 +642,15 @@ mod tests {
         // B
         let pos = PartialPosition::from_usi("sfen 9/4+R4/7+R1/9/9/9/9/9/2k1K4 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(2, 3).unwrap(),
-            to: Square::new(4, 3).unwrap(),
+            from: Square::SQ_2C,
+            to: Square::SQ_4C,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲４３竜寄".to_string()));
         let mv = Move::Normal {
-            from: Square::new(5, 2).unwrap(),
-            to: Square::new(4, 3).unwrap(),
+            from: Square::SQ_5B,
+            to: Square::SQ_4C,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -618,15 +659,15 @@ mod tests {
         // C
         let pos = PartialPosition::from_usi("sfen 9/9/9/9/4+R3+R/9/9/9/2k1K4 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(5, 5).unwrap(),
-            to: Square::new(3, 5).unwrap(),
+            from: Square::SQ_5E,
+            to: Square::SQ_3E,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲３５竜左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(1, 5).unwrap(),
-            to: Square::new(3, 5).unwrap(),
+            from: Square::SQ_1E,
+            to: Square::SQ_3E,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -635,15 +676,15 @@ mod tests {
         // D
         let pos = PartialPosition::from_usi("sfen 9/9/9/9/9/9/9/9/+R+R2K1k2 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(9, 9).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_9I,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８８竜左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(8, 9).unwrap(),
-            to: Square::new(8, 8).unwrap(),
+            from: Square::SQ_8I,
+            to: Square::SQ_8H,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -652,15 +693,15 @@ mod tests {
         // E
         let pos = PartialPosition::from_usi("sfen 9/9/9/9/9/9/9/7+R1/2k1K3+R b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(2, 8).unwrap(),
-            to: Square::new(1, 7).unwrap(),
+            from: Square::SQ_2H,
+            to: Square::SQ_1G,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲１７竜左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(1, 9).unwrap(),
-            to: Square::new(1, 7).unwrap(),
+            from: Square::SQ_1I,
+            to: Square::SQ_1G,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -673,15 +714,15 @@ mod tests {
         // A
         let pos = PartialPosition::from_usi("sfen +B+B7/9/9/9/9/9/9/9/4K1k2 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(9, 1).unwrap(),
-            to: Square::new(8, 2).unwrap(),
+            from: Square::SQ_9A,
+            to: Square::SQ_8B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８２馬左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(8, 1).unwrap(),
-            to: Square::new(8, 2).unwrap(),
+            from: Square::SQ_8A,
+            to: Square::SQ_8B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -690,15 +731,15 @@ mod tests {
         // B
         let pos = PartialPosition::from_usi("sfen 9/9/3+B5/9/+B8/9/9/9/4K1k2 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(9, 5).unwrap(),
-            to: Square::new(8, 5).unwrap(),
+            from: Square::SQ_9E,
+            to: Square::SQ_8E,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲８５馬寄".to_string()));
         let mv = Move::Normal {
-            from: Square::new(6, 3).unwrap(),
-            to: Square::new(8, 5).unwrap(),
+            from: Square::SQ_6C,
+            to: Square::SQ_8E,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -707,15 +748,15 @@ mod tests {
         // C
         let pos = PartialPosition::from_usi("sfen 8+B/9/9/6+B2/9/9/9/9/4K1k2 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(1, 1).unwrap(),
-            to: Square::new(1, 2).unwrap(),
+            from: Square::SQ_1A,
+            to: Square::SQ_1B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲１２馬引".to_string()));
         let mv = Move::Normal {
-            from: Square::new(3, 4).unwrap(),
-            to: Square::new(1, 2).unwrap(),
+            from: Square::SQ_3D,
+            to: Square::SQ_1B,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -724,15 +765,15 @@ mod tests {
         // D
         let pos = PartialPosition::from_usi("sfen 9/9/9/9/9/9/9/9/+B3+BK1k1 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(9, 9).unwrap(),
-            to: Square::new(7, 7).unwrap(),
+            from: Square::SQ_9I,
+            to: Square::SQ_7G,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲７７馬左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(5, 9).unwrap(),
-            to: Square::new(7, 7).unwrap(),
+            from: Square::SQ_5I,
+            to: Square::SQ_7G,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -741,15 +782,15 @@ mod tests {
         // E
         let pos = PartialPosition::from_usi("sfen 9/9/9/9/9/9/5+B3/8+B/2k1K4 b - 1").unwrap();
         let mv = Move::Normal {
-            from: Square::new(4, 7).unwrap(),
-            to: Square::new(2, 9).unwrap(),
+            from: Square::SQ_4G,
+            to: Square::SQ_2I,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲２９馬左".to_string()));
         let mv = Move::Normal {
-            from: Square::new(1, 8).unwrap(),
-            to: Square::new(2, 9).unwrap(),
+            from: Square::SQ_1H,
+            to: Square::SQ_2I,
             promote: false,
         };
         let result = display_single_move(&pos, mv);
@@ -760,8 +801,8 @@ mod tests {
     fn drop_works_0() {
         let pos = PartialPosition::from_usi("sfen 4k4/9/9/9/9/9/9/4G4/4K4 b G 1").unwrap();
         let mv = Move::Drop {
-            to: Square::new(4, 8).unwrap(),
-            piece: Piece::new(PieceKind::Gold, Color::Black),
+            to: Square::SQ_4H,
+            piece: Piece::B_G,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲４８金打".to_string()));
@@ -771,8 +812,8 @@ mod tests {
     fn drop_works_1() {
         let pos = PartialPosition::from_usi("sfen 4k4/9/9/9/9/9/9/9/4K4 b G 1").unwrap();
         let mv = Move::Drop {
-            to: Square::new(4, 8).unwrap(),
-            piece: Piece::new(PieceKind::Gold, Color::Black),
+            to: Square::SQ_4H,
+            piece: Piece::B_G,
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲４８金".to_string()));
