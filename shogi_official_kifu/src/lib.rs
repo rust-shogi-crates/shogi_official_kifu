@@ -212,7 +212,7 @@ fn disambiguate<W: Write>(
                     if mv_to != to {
                         continue;
                     }
-                    if position.piece_at(from) != Some(p) {
+                    if position.PartialPosition_piece_at(from) != Some(p).into() {
                         continue;
                     }
                     candidates |= from;
@@ -244,7 +244,7 @@ fn disambiguate<W: Write>(
                     if mv_to != to {
                         continue;
                     }
-                    if position.piece_at(from) != Some(p) {
+                    if position.PartialPosition_piece_at(from) != Some(p).into() {
                         continue;
                     }
                     normal_possible = true;
