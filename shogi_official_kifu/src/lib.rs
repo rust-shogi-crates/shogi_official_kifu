@@ -7,7 +7,8 @@ extern crate alloc;
 
 use core::fmt::Write;
 use shogi_core::{
-    Bitboard, Color, CompactMove, LegalityChecker, Move, PartialPosition, Piece, PieceKind, Square,
+    c_compat::OptionPiece, Bitboard, Color, CompactMove, LegalityChecker, Move, PartialPosition,
+    Piece, PieceKind, Square,
 };
 use shogi_legality_lite::LiteLegalityChecker;
 
@@ -102,7 +103,9 @@ pub unsafe extern "C" fn display_single_compactmove(
     ptr: *mut u8,
 ) -> bool {
     let mut sink = Bridge(ptr);
-    let result = display_single_move_write(position, mv.into(), &mut sink).unwrap_unchecked();
+    let result =
+        display_single_move_write(position, <Move as From<CompactMove>>::from(mv), &mut sink)
+            .unwrap_unchecked();
     result.is_some()
 }
 
@@ -121,8 +124,12 @@ pub unsafe extern "C" fn display_single_compactmove_kansuji(
     ptr: *mut u8,
 ) -> bool {
     let mut sink = Bridge(ptr);
-    let result =
-        display_single_move_write_kansuji(position, mv.into(), &mut sink).unwrap_unchecked();
+    let result = display_single_move_write_kansuji(
+        position,
+        <Move as From<CompactMove>>::from(mv),
+        &mut sink,
+    )
+    .unwrap_unchecked();
     result.is_some()
 }
 
@@ -212,7 +219,7 @@ fn disambiguate<W: Write>(
                     if mv_to != to {
                         continue;
                     }
-                    if position.PartialPosition_piece_at(from) != Some(p).into() {
+                    if position.PartialPosition_piece_at(from) != OptionPiece::from(Some(p)) {
                         continue;
                     }
                     candidates |= from;
@@ -244,7 +251,7 @@ fn disambiguate<W: Write>(
                     if mv_to != to {
                         continue;
                     }
-                    if position.PartialPosition_piece_at(from) != Some(p).into() {
+                    if position.PartialPosition_piece_at(from) != OptionPiece::from(Some(p)) {
                         continue;
                     }
                     normal_possible = true;
