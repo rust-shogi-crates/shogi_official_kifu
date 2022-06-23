@@ -1,4 +1,4 @@
-# Rust shogi crates: Official Game Records (`cdylib`)
+# Rust shogi crates: Official notation of moves (`cdylib`)
 ![Rust Version](https://img.shields.io/badge/rustc-1.60+-blue.svg)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/mit-license.php)
 
