@@ -12,7 +12,8 @@ categories = ["games", "game-engines", "game-development", "no-std"]
 publish = false
 
 [features]
-default = ["std"]
+default = ["kansuji", "std"]
+kansuji = ["shogi_official_kifu/kansuji"]
 std = ["shogi_official_kifu/std"]
 
 [lib]
