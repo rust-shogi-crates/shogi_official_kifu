@@ -1,6 +1,7 @@
 #![cfg_attr(not(test), no_std)] // Forbids using std::*.
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![cfg_attr(bench, feature(test))]
+#![doc = include_str!("../README.md")]
 
 extern crate alloc;
 
