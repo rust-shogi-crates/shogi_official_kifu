@@ -176,13 +176,10 @@ fn write_side_and_find_to<W: Write>(
     let side = position.side_to_move();
     let side_color = if side == Color::Black { '▲' } else { '△' };
     let to = match mv {
-        Move::Normal { from, to, .. } => {
-            let last_move = position.last_move();
-            if let Some(Move::Normal { to: last_to, .. }) = last_move {
+        Move::Normal { to, .. } => {
+            if let Some(last_move) = position.last_move() {
+                let last_to = last_move.to();
                 if last_to == to {
-                    if position.piece_at(from).is_none() {
-                        return Ok(None);
-                    }
                     w.write_char(side_color)?;
                     w.write_char('同')?;
                     return Ok(None);
@@ -351,6 +348,15 @@ mod tests {
         };
         let result = display_single_move(pos.inner(), mv);
         assert_eq!(result, Some("▲同金引".to_string()));
+
+        let pos = Position::from_usi("sfen 4k4/9/9/9/9/9/9/9/4KG3 w g 2 moves G*5h").unwrap();
+        let mv = Move::Normal {
+            from: Square::SQ_4I,
+            to: Square::SQ_5H,
+            promote: false,
+        };
+        let result = display_single_move(pos.inner(), mv);
+        assert_eq!(result, Some("▲同金".to_string()));
     }
 
     #[test]
