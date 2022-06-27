@@ -4,22 +4,22 @@ version = 3
 
 [[package]]
 name = "shogi_core"
-version = "0.1.3"
+version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f1cc0e98d4e78c3ad6d740dbf75c28da7626933617f8d7201b84ca1da967006"
+checksum = "f0c99c07667dfb58bac4cd9156e3d1ead9f3c78223a282301bc51f49b4efcf2d"
 
 [[package]]
 name = "shogi_legality_lite"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5d6e854c66d3cc63d135f5a1f5a766245608f6de176af43f28320704e90cd44"
+checksum = "4a1b3b7f5092269af9fad7d3c6978824179d27f04f4bbaecad6ac4adf6f94f16"
 dependencies = [
  "shogi_core",
 ]
 
 [[package]]
 name = "shogi_official_kifu"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "shogi_core",
  "shogi_legality_lite",
