@@ -7,10 +7,9 @@ extern crate alloc;
 
 use core::fmt::Write;
 use shogi_core::{
-    c_compat::OptionPiece, Bitboard, Color, CompactMove, LegalityChecker, Move, PartialPosition,
-    Piece, PieceKind, Square,
+    c_compat::OptionPiece, Bitboard, Color, CompactMove, Move, PartialPosition, Piece, PieceKind,
+    Square,
 };
-use shogi_legality_lite::LiteLegalityChecker;
 
 /// Disambiguation of normal moves.
 mod disambiguation;
@@ -198,7 +197,7 @@ fn disambiguate<W: Write>(
     mv: Move,
     w: &mut W,
 ) -> Result<Option<()>, core::fmt::Error> {
-    let all_moves = LiteLegalityChecker.all_legal_moves_partial(position);
+    let all_moves = shogi_legality_lite::prelegality::all_valid_moves(position);
     match mv {
         Move::Normal { from, to, promote } => {
             let p = if let Some(p) = position.piece_at(from) {
@@ -831,5 +830,27 @@ mod tests {
         };
         let result = display_single_move(&pos, mv);
         assert_eq!(result, Some("▲４８金".to_string()));
+    }
+
+    // A test taken from https://github.com/rust-shogi-crates/shogi_official_kifu/issues/5's comment.
+    #[test]
+    fn normal_includes_illegal() {
+        // One of Black's silvers is pinned.
+        let pos = PartialPosition::from_usi("sfen 4k4/9/9/9/2rSKS3/9/9/9/9 b - 1").unwrap();
+
+        let mv = Move::Normal {
+            from: Square::SQ_6E,
+            to: Square::SQ_5F,
+            promote: false,
+        };
+        let result = display_single_move(&pos, mv);
+        assert_eq!(result, Some("▲５６銀左".to_string()));
+        let mv = Move::Normal {
+            from: Square::SQ_4E,
+            to: Square::SQ_5F,
+            promote: false,
+        };
+        let result = display_single_move(&pos, mv);
+        assert_eq!(result, Some("▲５６銀右".to_string()));
     }
 }

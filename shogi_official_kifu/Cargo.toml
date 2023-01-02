@@ -28,7 +28,7 @@ crate-type = [
 
 [dependencies]
 shogi_core = { version = "0.1", default-features = false, features = ["alloc"] }
-shogi_legality_lite = { version = "0.1.1", default-features = false, features = ["alloc"] }
+shogi_legality_lite = { version = "0.1.2", default-features = false, features = ["alloc"] }
 
 [dev-dependencies]
 shogi_usi_parser = "=0.1.0"

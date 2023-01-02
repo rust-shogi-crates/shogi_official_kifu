@@ -10,9 +10,9 @@ checksum = "3d0a7de4ff7c66bf0b6346bda1d530c94a496f8aa3317938923886c58191aa14"
 
 [[package]]
 name = "shogi_legality_lite"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a1b3b7f5092269af9fad7d3c6978824179d27f04f4bbaecad6ac4adf6f94f16"
+checksum = "706de12806577bb7732e6387a2df49cb93a2cea1ccb3e0e1cbbe258a633a007e"
 dependencies = [
  "shogi_core",
 ]

@@ -10,7 +10,7 @@ This crate is for automated testing of the size after the compilation of the `rl
 If the `rlib` crate also had `crate_type = "cdylib"`, the `rlib` crate would define `no_std`-related functions (e.g., a panic handler, memory-related functions, an alloc handler), which prevents other crates from depending on the `rlib` crate and define their own `no_std`-related functions (if they are e.g. `cdylib` crates). Therefore, separating a `cdylib` crate from an `rlib` crate is inevitable.
 
 ## Size of the artifact
-For x86_64-unknown-linux-gnu, the resulting shared object's size does not exceed 50KiB.
+For x86_64-unknown-linux-gnu, the resulting shared object's size does not exceed 65KiB.
 
 ## Available features
 - `alloc`: `alloc`-related functionalities are made available. Enabled by default.
