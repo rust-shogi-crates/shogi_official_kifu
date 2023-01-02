@@ -19,7 +19,7 @@ dependencies = [
 
 [[package]]
 name = "shogi_official_kifu"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "shogi_core",
  "shogi_legality_lite",
