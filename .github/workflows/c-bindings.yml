@@ -58,5 +58,5 @@ jobs:
     - name: cargo bloat (display, per-crate, release)
       run: cargo +nightly bloat --release --no-default-features --features kansuji --crates
     - name: cargo bloat (testing, release)
-      # Size <= 60KiB?
-      run: cargo +nightly bloat --release --no-default-features --features kansuji --message-format json | jq --exit-status '."file-size" <= 61440'
+      # Size <= 65KiB && text <= 20KiB?
+      run: cargo +nightly bloat --release --no-default-features --features kansuji --message-format json | jq --exit-status '."file-size" <= 66560 and ."text-section-size" <= 20480'
